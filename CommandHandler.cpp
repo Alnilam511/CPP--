@@ -31,29 +31,29 @@ void DrawLine(HWND hWnd, double* num, int n)                          //固定波形
 {
     HDC hdc = GetDC(hWnd);
     GetClientRect(hWnd, &rect);
-    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
-    SetBkColor(hdc, RGB(0, 0, 0));
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
+    SetBkColor(hdc, RGB(255, 255, 255));
     FillRect(hdc, &rect, hBrush);
     DeleteObject(hBrush);
-    hpen = CreatePen(PS_DASHDOT, 1, RGB(50, 50, 50));
+    hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
     SelectObject(hdc, hpen);
-    int i = rect.bottom / 10;  int j = rect.right / 10;
+    int i = rect.bottom / 5;  int j = rect.right / 5;
     while (i < rect.bottom)
     {
         MoveToEx(hdc, 0, i, NULL);
         LineTo(hdc, rect.right, i);
-        i = i + rect.bottom / 10;
+        i = i + rect.bottom / 5;
     }
     while (j < rect.right)
     {
         MoveToEx(hdc, j, 0, NULL);
         LineTo(hdc, j, rect.bottom);
-        j = j + rect.right / 10;
+        j = j + rect.right / 5;
     }
     DeleteObject(hpen);
     if (num != NULL)
     {
-        hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 0));
+        hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));             //DodgerBlue
         SelectObject(hdc, hpen);
         int k = 0;
         aptt = new POINT[n];
@@ -64,10 +64,10 @@ void DrawLine(HWND hWnd, double* num, int n)                          //固定波形
             min = Minimum(min, num[l]);
         }
         max = Maximum(fabs(max), fabs(min));
-        while (k < n)
+        while (k <= n)
         {
-            aptt[k].x = k * rect.right / n;
-            aptt[k].y = (long)((num[k - 1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+            aptt[k].x = k * rect.right / (n-1);
+            aptt[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom/2;
             k++;
         }
         Polyline(hdc, aptt, n);

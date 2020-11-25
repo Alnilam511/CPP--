@@ -175,7 +175,7 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     HBRUSH hbrush = CreateSolidBrush(RGB(255, 255, 255));
     FillRect(hdc, &rect, hbrush);
     DeleteObject(hbrush);
-    while (i >= aptt[k].x)
+    while (i > aptt[k].x)
     {
         k++;
     }
@@ -184,16 +184,19 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     {
         l++;
     }
-    m = l - k + 1;
+    m = l - k;
     apt1 = new POINT[m];
     
-    while (n<=m)
+    while (n<m)
     {
         apt1[n] = aptt[k];
         n++;
         k++;
     }
+    hpen = CreatePen(PS_SOLID, 1, RGB(255,127,0));                 //DarkOrange1
+    SelectObject(hdc, hpen);
     Polyline(hdc, apt1, m);
+    DeleteObject(hpen);
 }
 
 
@@ -207,32 +210,32 @@ void Drawlinemk3(HWND hWnd){
     int k = 0;
     HDC hdc = GetDC(hWnd);
     GetClientRect(hWnd, &rect);
-    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
-    SetBkColor(hdc, RGB(0, 0, 0));
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
+    SetBkColor(hdc, RGB(255, 255, 255));
     FillRect(hdc, &rect, hBrush);
     DeleteObject(hBrush);
-    hpen = CreatePen(PS_DASHDOT, 1, RGB(50, 50, 50));
+    hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));                   //Gainsboro
     SelectObject(hdc, hpen);
-    int i = rect.bottom / 10;  int j = rect.right / 10;
+    int i = rect.bottom / 5;  int j = rect.right / 5;
     while (i < rect.bottom)
     {
         MoveToEx(hdc, 0, i, NULL);
         LineTo(hdc, rect.right, i);
-        i = i + rect.bottom / 10;
+        i = i + rect.bottom / 5;
     }
     while (j < rect.right)
     {
         MoveToEx(hdc, j, 0, NULL);
         LineTo(hdc, j, rect.bottom);
-        j = j + rect.right / 10;
+        j = j + rect.right / 5;
     }
     DeleteObject(hpen);
-    hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 0));
+    hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));                      //DodgerBlue
     SelectObject(hdc, hpen);
     apt2 = new POINT[m];
-    while (k<m)
+    while (k<m && m != 1 )
     {
-        apt2[k].x = k * rect.right / m;
+        apt2[k].x = k * rect.right / (m-1);
         apt2[k].y = apt1[k].y * rect.bottom / 80;
         k++;
     }
