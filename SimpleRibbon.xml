@@ -1,0 +1,279 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<Application xmlns='http://schemas.microsoft.com/windows/2009/Ribbon'>
+
+  <Application.Commands>
+
+    <Command Name="cmdTab1" LabelTitle="采样示波"/>	
+    <Command Name="cmdTab2" LabelTitle="时域处理"/>  
+	<Command Name="cmdTab3" LabelTitle="频域处理"/>
+    <Command Name="cmdTab4" LabelTitle="时频域处理"/>
+	<Command Name="cmdTab5" LabelTitle="高级处理"/>
+	<Command Name="cmdTab6" LabelTitle="输出"/>
+
+    <Command Name="cmdGroup1"/>
+    <Command Name="cmdGroup2"/>
+    <Command Name="cmdGroup3" LabelTitle="时域统计量"/>
+    <Command Name="cmdGroup4" LabelTitle="相关分析"/>
+	<Command Name="cmdGroup5" LabelTitle="频谱分析"/>
+	  
+    <Command Name="cmdButton1">
+		<Command.LabelTitle>
+			<String Id ="210">采样</String>
+		</Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id="211">res/AddTableL.bmp</Image>
+      </Command.LargeImages>
+      <Command.SmallImages>
+        <Image Id="212">res/AddTableS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+    <Command Name="cmdButton2">
+      <Command.LabelTitle>
+        <String Id ="220">示波</String>
+      </Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id="221">res/PrintRelationshipsL.bmp</Image>
+      </Command.LargeImages>
+      <Command.SmallImages>
+        <Image Id="222">res/PrintRelationshipsS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+	  
+    <Command Name="cmdButton3">
+      <Command.LabelTitle>
+        <String Id ="230">峰值</String>
+      </Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id="231">res/PrintRelationshipsL.bmp</Image>
+      </Command.LargeImages>
+      <Command.SmallImages>
+        <Image Id="232">res/PrintRelationshipsS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+    <Command Name="cmdButton4">
+      <Command.LabelTitle>
+        <String Id ="240">方差</String>
+      </Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id="241">res/PrintRelationshipsL.bmp</Image>
+      </Command.LargeImages>
+      <Command.SmallImages>
+        <Image Id="242">res/PrintRelationshipsS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+    <Command Name="cmdButton5">
+      <Command.LabelTitle>
+        <String Id ="250">峭度</String>
+      </Command.LabelTitle>
+      <Command.SmallImages>
+        <Image Id="251">res/PrintRelationshipsS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+
+	<Command Name="cmdButton6">
+      <Command.LabelTitle>
+		<String Id="260">自相关分析</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="261">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton7">
+	  <Command.LabelTitle>
+   	    <String Id="270">互相关分析</String>
+	  </Command.LabelTitle>
+      <Command.LargeImages>
+		<Image Id="271">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	  
+    <Command Name="cmdButton8">
+      <Command.LabelTitle>
+        <String Id ="280">自谱分析</String>
+      </Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id="281">res/AddTableL.bmp</Image>
+      </Command.LargeImages>
+      <Command.SmallImages>
+        <Image Id="282">res/AddTableS.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+    <Command Name="cmdButton9">
+      <Command.LabelTitle>
+        <String Id ="290">互谱分析</String>
+      </Command.LabelTitle>
+      <Command.SmallImages>
+        <Image Id="291">res/Copy.bmp</Image>
+      </Command.SmallImages>
+    </Command>
+	<Command Name="cmdButton10">
+	  <Command.LabelTitle>
+		<String Id ="300">倒谱分析</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="301">res/Button_Image.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	  
+	<Command Name="cmdButton11">
+	  <Command.LabelTitle>
+		<String Id ="310">短时傅里叶变换</String>
+   	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="311">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton12">
+	  <Command.LabelTitle>
+		<String Id ="320">小波分析</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="321">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton13">
+	  <Command.LabelTitle>
+	    <String Id ="330">小波包分析</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="331">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton14">
+   	  <Command.LabelTitle>
+  	    <String Id ="340">希尔伯特黄变换</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="341">res/PrintRelationshipsL.bmp</Image>
+      </Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton15">
+		<Command.LabelTitle>
+			<String Id ="350">经验模态分析</String>
+		</Command.LabelTitle>
+		<Command.LargeImages>
+			<Image Id="351">res/PrintRelationshipsL.bmp</Image>
+		</Command.LargeImages>
+	</Command>
+	<Command Name="cmdButton16">
+	  <Command.LabelTitle>
+		<String Id ="360">分数阶傅里叶变换</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="361">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	  
+	<Command Name="cmdButton17">
+	  <Command.LabelTitle>
+		<String Id ="370">包络谱</String>
+	  </Command.LabelTitle>
+	  <Command.LargeImages>
+		<Image Id="371">res/PrintRelationshipsL.bmp</Image>
+	  </Command.LargeImages>
+	</Command>
+	  
+	  
+	  
+    <Command Name="cmdQat"/>
+    <Command Name="cmdFileMenu"/>
+    <Command Name="cmdExit" Symbol="IDC_CMD_EXIT">
+      <Command.LabelTitle>
+        <String Id ="110">退出</String>
+      </Command.LabelTitle>
+      <Command.LargeImages>
+        <Image Id ="111">res/ExitL.bmp</Image>
+      </Command.LargeImages>
+    </Command>
+  </Application.Commands>
+	
+  <Application.Views>
+    <Ribbon>
+      <Ribbon.ApplicationMenu>
+        <ApplicationMenu CommandName="cmdFileMenu">
+          <MenuGroup Class="MajorItems">
+            <Button CommandName="cmdExit"/>
+          </MenuGroup>
+        </ApplicationMenu>
+      </Ribbon.ApplicationMenu>
+      <Ribbon.Tabs>
+        <Tab CommandName="cmdTab1">
+          <Tab.ScalingPolicy>
+            <ScalingPolicy>
+              <ScalingPolicy.IdealSizes>
+                <!-- This describes the maximum size of each group in the tab. -->
+                <Scale Group="cmdGroup1" Size="Large" />
+                <Scale Group="cmdGroup2" Size="Large" />
+              </ScalingPolicy.IdealSizes>
+              <!-- This describes the order and how the groups shrink when the window is
+              resized. --><!--
+              <Scale Group="cmdGroup3" Size="Medium" />
+              <Scale Group="cmdGroup4" Size="Medium" />
+              <Scale Group="cmdGroup1" Size="Popup" />
+              <Scale Group="cmdGroup4" Size="Small" />
+              <Scale Group="cmdGroup2" Size="Medium" />-->
+            </ScalingPolicy>
+          </Tab.ScalingPolicy>
+          <Group CommandName="cmdGroup1" SizeDefinition="OneButton">
+            <Button CommandName="cmdButton1" />
+          </Group>
+          <Group CommandName="cmdGroup2" SizeDefinition="OneButton">
+            <Button CommandName="cmdButton2" />
+          </Group>
+        </Tab>
+		  <Tab CommandName="cmdTab2">
+			<Tab.ScalingPolicy>
+				<ScalingPolicy>
+					<ScalingPolicy.IdealSizes>
+						<Scale Group="cmdGroup3" Size="Medium" />
+						<Scale Group="cmdGroup4" Size="Large" />
+					</ScalingPolicy.IdealSizes>
+				</ScalingPolicy>
+			</Tab.ScalingPolicy>
+			<Group CommandName="cmdGroup3" SizeDefinition="ThreeButtons">
+				<Button CommandName="cmdButton3"/>
+				<Button CommandName="cmdButton4"/>
+				<Button CommandName="cmdButton5"/>				
+		    </Group>
+			<Group CommandName="cmdGroup4" SizeDefinition="TwoButtons">
+				<Button CommandName="cmdButton6"/>
+				<Button CommandName="cmdButton7"/>
+			</Group>			  
+		</Tab>
+		<Tab CommandName="cmdTab3">
+		  <Group CommandName="cmdGroup5" SizeDefinition="ThreeButtons">
+			<Button CommandName="cmdButton8"/>
+			<Button CommandName="cmdButton9"/>
+			<Button CommandName="cmdButton10"/>
+		  </Group>	 
+		</Tab>
+		<Tab CommandName="cmdTab4">
+		  <Tab.ScalingPolicy>
+			<ScalingPolicy>
+			  <ScalingPolicy.IdealSizes>
+				<Scale Group="cmdGroup1" Size="Medium" />
+		      </ScalingPolicy.IdealSizes>
+			</ScalingPolicy>
+		  </Tab.ScalingPolicy>
+		  <Group CommandName="cmdGroup1" SizeDefinition="SixButtons-TwoColumns">
+			<Button CommandName="cmdButton11"/>
+			<Button CommandName="cmdButton12"/>
+			<Button CommandName="cmdButton13"/>
+			<Button CommandName="cmdButton14"/>
+			<Button CommandName="cmdButton15"/>
+			<Button CommandName="cmdButton16"/>  			  
+		  </Group>
+		</Tab>
+		<Tab CommandName="cmdTab5">
+			<Group CommandName="cmdGroup1" SizeDefinition="OneButton">
+				<Button CommandName="cmdButton17"/>
+			</Group>	
+		</Tab>
+      </Ribbon.Tabs>
+      <Ribbon.QuickAccessToolbar>
+        <QuickAccessToolbar CommandName="cmdQat" />
+      </Ribbon.QuickAccessToolbar>
+    </Ribbon>
+  </Application.Views>
+</Application>
