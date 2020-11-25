@@ -187,7 +187,7 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     m = l - k + 1;
     apt1 = new POINT[m];
     
-    while (n<m)
+    while (n<=m)
     {
         apt1[n] = aptt[k];
         n++;
