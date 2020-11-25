@@ -13,6 +13,7 @@
 #define MAX_LOADSTRING 100
 
 int a;
+POINT* apt1;
 TCHAR szBuffer[MAX_PATH];
 
 HINSTANCE hInst;                                
@@ -26,7 +27,7 @@ ULONG_PTR m_gdiplusToken;
 POINT pt;
 POINT ptt;
 BOOL ismove=FALSE;
-int k, l,m;
+int m;
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -149,11 +150,24 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
 {
+    int k, l;
     HDC hdc = GetDC(hWnd);
     GetClientRect(hWnd, &rect);
     k = l = 0;
     long i, j;
     int n=0;
+    if (ptt1.x > 900)
+    {
+        ptt1.x = 900;
+    }
+    if (ptt1.y >80)
+    {
+        ptt1.y = 80;
+    }
+    if (ptt1.y < 0)
+    {
+        ptt1.y = 0;
+    }
     i= min(pt1.x, ptt1.x);
     j= max(pt1.x, ptt1.x);
     rect.left = i;
@@ -166,24 +180,65 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
         k++;
     }
     l = k;
-    while (j >= aptt[l].x)
+    while (j > aptt[l].x)
     {
         l++;
     }
     m = l - k + 1;
-    POINT *apt1;
     apt1 = new POINT[m];
     
-    while (n<=m)
+    while (n<m)
     {
         apt1[n] = aptt[k];
         n++;
         k++;
     }
-    Polyline(hdc, apt1, n);
+    Polyline(hdc, apt1, m);
 }
 
 
+
+void Drawlinemk3(HWND hWnd){
+    if (hWnd == hStatic4)
+    {
+        hWnd = hStatic6;
+    }
+    POINT* apt2;
+    int k = 0;
+    HDC hdc = GetDC(hWnd);
+    GetClientRect(hWnd, &rect);
+    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
+    SetBkColor(hdc, RGB(0, 0, 0));
+    FillRect(hdc, &rect, hBrush);
+    DeleteObject(hBrush);
+    hpen = CreatePen(PS_DASHDOT, 1, RGB(50, 50, 50));
+    SelectObject(hdc, hpen);
+    int i = rect.bottom / 10;  int j = rect.right / 10;
+    while (i < rect.bottom)
+    {
+        MoveToEx(hdc, 0, i, NULL);
+        LineTo(hdc, rect.right, i);
+        i = i + rect.bottom / 10;
+    }
+    while (j < rect.right)
+    {
+        MoveToEx(hdc, j, 0, NULL);
+        LineTo(hdc, j, rect.bottom);
+        j = j + rect.right / 10;
+    }
+    DeleteObject(hpen);
+    hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 0));
+    SelectObject(hdc, hpen);
+    apt2 = new POINT[m];
+    while (k<m)
+    {
+        apt2[k].x = k * rect.right / m;
+        apt2[k].y = apt1[k].y * rect.bottom / 80;
+        k++;
+    }
+    Polyline(hdc, apt2, m);
+    DeleteObject(hpen);
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -271,7 +326,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP: {
         if (ismove == TRUE)
         {
-
+            Drawlinemk3(hStatic4);
         }
         ismove = FALSE;
         break;

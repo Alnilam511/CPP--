@@ -64,7 +64,7 @@ void DrawLine(HWND hWnd, double* num, int n)                          //¹Ì¶¨²¨ÐÎ
             min = Minimum(min, num[l]);
         }
         max = Maximum(fabs(max), fabs(min));
-        while (k <= n)
+        while (k < n)
         {
             aptt[k].x = k * rect.right / n;
             aptt[k].y = (long)((num[k - 1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
