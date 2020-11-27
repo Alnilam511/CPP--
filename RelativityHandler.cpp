@@ -55,7 +55,11 @@ STDMETHODIMP CRelativityHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n 自相关系数为:\n   %.2f";
             swprintf_s(szBuffer, str, n, R);
-            DrawLine(hStatic4, num, n);
+
+            ShowWindow(hStatic5, SW_HIDE);
+            DrawLine(hStatic4, num, n);                                //固定波形绘制
+            gnum = num;
+            gn = n;
         }
 
     }

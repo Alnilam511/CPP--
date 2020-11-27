@@ -160,6 +160,10 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     {
         ptt1.x = 900;
     }
+    if (ptt1.x < 0 )
+    {
+        ptt1.x = 0;
+    }
     if (ptt1.y >80)
     {
         ptt1.y = 80;

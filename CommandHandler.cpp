@@ -168,7 +168,11 @@ STDMETHODIMP CCommandHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n 均值:\n   %e\n 方差:\n   %e";
             swprintf_s(szBuffer, str, n, average, variance);
-            DrawLine(hStatic4, num, n);
+
+            ShowWindow(hStatic5, SW_HIDE);
+            DrawLine(hStatic4, num, n);                              
+            gnum = num;
+            gn = n;
         }
 
     }
@@ -205,7 +209,12 @@ STDMETHODIMP CCommandHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n 峭度:\n   %e";
             swprintf_s(szBuffer, str, n, kurtosis);
-            DrawLine(hStatic4, num, n);
+
+            ShowWindow(hStatic5, SW_HIDE);
+            DrawLine(hStatic4, num, n);                                //固定波形绘制
+            gnum = num;
+            gn = n;
+
         }
 
     }
