@@ -25,7 +25,7 @@ STDMETHODIMP CRelativityHandler::Execute(
     
     if (nCmdID == cmdButton6 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -66,7 +66,7 @@ STDMETHODIMP CRelativityHandler::Execute(
 
     if (nCmdID == cmdButton7 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         TCHAR szPath[MAX_PATH];
@@ -145,7 +145,18 @@ STDMETHODIMP CRelativityHandler::Execute(
                 ShowWindow(hStatic5, SW_SHOWDEFAULT);
                 DrawLine(hStatic4, num1, n1);
                 DrawLine(hStatic5, num2, n2);
-
+                gn = n1;                                                          //双窗口gnum，gnum1赋值
+                gn1 = n2;
+                gnum = new double[gn];
+                gnum1 = new double[gn1];
+                for (int i = 0; i < gn; i++)
+                {
+                    gnum[i] = num1[i];
+                }
+                for (int i = 0; i < gn1; i++)
+                {
+                    gnum1[i] = num2[i];
+                }
             }
             else
             {
