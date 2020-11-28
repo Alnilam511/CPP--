@@ -49,6 +49,19 @@ static double* GetNum(std::ifstream& fin, int n)
 	return num;
 }
 
+//局部赋值 
+static double* GetPart(double num[],int l, int k)
+{
+	static double part[10240] = { 0 };
+	for (int i = k; i < l + 1; i++)
+	{
+		int j = 0;
+		part[j] = num[i];
+		j = j + 1;
+	}
+	return part;
+}
+
 //最大值
 static double Maximum(double x, double y)
 {

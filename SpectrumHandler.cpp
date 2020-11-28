@@ -39,7 +39,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
     if (nCmdID == cmdButton8 && verb == UI_EXECUTIONVERB_EXECUTE)
     {    
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			
         TCHAR szFile[MAX_PATH];
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -92,7 +92,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
     if (nCmdID == cmdButton9 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         TCHAR szPath[MAX_PATH];
@@ -195,7 +195,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
     if (nCmdID == cmdButton10 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;
         TCHAR szFile[MAX_PATH];
         ZeroMemory(&ofn, sizeof(OPENFILENAME));

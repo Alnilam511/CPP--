@@ -19,62 +19,76 @@ using namespace std;
  HPEN hpen;
  double* gnum;
  double* gnum1;
- double* gnum2;
  int gn;
  int gn1;
- int gn2;
+ POINT* apt;
  POINT* aptt;
 
+ double* input;
 
+ void DrawLine(HWND hWnd, double* num, int n)                          //固定波形绘制，num波形数组，n数组长度
+ {
+     HDC hdc = GetDC(hWnd);
+     GetClientRect(hWnd, &rect);
+     HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
+     SetBkColor(hdc, RGB(255, 255, 255));
+     FillRect(hdc, &rect, hBrush);
+     DeleteObject(hBrush);
+     hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
+     SelectObject(hdc, hpen);
+     int i = rect.bottom / 5;  int j = rect.right / 5;
+     while (i < rect.bottom)
+     {
+         MoveToEx(hdc, 0, i, NULL);
+         LineTo(hdc, rect.right, i);
+         i = i + rect.bottom / 5;
+     }
+     while (j < rect.right)
+     {
+         MoveToEx(hdc, j, 0, NULL);
+         LineTo(hdc, j, rect.bottom);
+         j = j + rect.right / 5;
+     }
+     DeleteObject(hpen);
+     if (num != NULL)
+     {
+         hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));             //DodgerBlue
+         SelectObject(hdc, hpen);
+         int k = 0;
+         double min = num[0], max = num[0];
+         for (int l = 1; l < n; l++)
+         {
+             max = Maximum(max, num[l]);
+             min = Minimum(min, num[l]);
+         }
+         max = Maximum(fabs(max), fabs(min));
+         if (hWnd == hStatic4)                            //hstatic4 aptt
+         {
+             aptt = new POINT[n];
+             while (k < n)
+             {
+                 aptt[k].x = k * rect.right / (n - 1);
+                 aptt[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                 k++;
+             }
+             Polyline(hdc, aptt, n);
+         }
+         if (hWnd == hStatic5)                          //hstatic5 apt
+         {
+             apt = new POINT[n];
+             while (k <= n)
+             {
+                 apt[k].x = k * rect.right / (n - 1);
+                 apt[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                 k++;
+             }
+             Polyline(hdc, apt, n);
 
-void DrawLine(HWND hWnd, double* num, int n)                          //固定波形绘制，num波形数组，n数组长度
-{
-    HDC hdc = GetDC(hWnd);
-    GetClientRect(hWnd, &rect);
-    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
-    SetBkColor(hdc, RGB(255, 255, 255));
-    FillRect(hdc, &rect, hBrush);
-    DeleteObject(hBrush);
-    hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
-    SelectObject(hdc, hpen);
-    int i = rect.bottom / 5;  int j = rect.right / 5;
-    while (i < rect.bottom)
-    {
-        MoveToEx(hdc, 0, i, NULL);
-        LineTo(hdc, rect.right, i);
-        i = i + rect.bottom / 5;
-    }
-    while (j < rect.right)
-    {
-        MoveToEx(hdc, j, 0, NULL);
-        LineTo(hdc, j, rect.bottom);
-        j = j + rect.right / 5;
-    }
-    DeleteObject(hpen);
-    if (num != NULL)
-    {
-        hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));             //DodgerBlue
-        SelectObject(hdc, hpen);
-        int k = 0;
-        aptt = new POINT[n];
-        double min = num[0], max = num[0];
-        for (int l = 1; l < n; l++)
-        {
-            max = Maximum(max, num[l]);
-            min = Minimum(min, num[l]);
-        }
-        max = Maximum(fabs(max), fabs(min));
-        while (k <= n)
-        {
-            aptt[k].x = k * rect.right / (n-1);
-            aptt[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom/2;
-            k++;
-        }
-        Polyline(hdc, aptt, n);
-        DeleteObject(hpen);
-    }
+         }
+         DeleteObject(hpen);
+     }
 
-}
+ }
 
 STDMETHODIMP CCommandHandler::Execute(
     UINT nCmdID,
@@ -91,7 +105,7 @@ STDMETHODIMP CCommandHandler::Execute(
 
     if (nCmdID == cmdButton3 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -115,21 +129,21 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            double* num = GetNum(fin, n);
+            input = GetNum(fin, n);
 
-            double min = num[0], max = num[0];
+            double min = input[0], max = input[0];
             for (int i = 1; i < n; i++)
             {
-                max = Maximum(max, num[i]);
-                min = Minimum(min, num[i]);
+                max = Maximum(max, input[i]);
+                min = Minimum(min, input[i]);
             }
             
-            LPCTSTR str = L" 数据个数:\n   %i\n 峰值为:\n   %e\n   %e";
+            LPCTSTR str = L" 数据个数:\n   %i\n 峰值为:\n   %e\n   %e\n";
             swprintf_s(szBuffer, str, n, max, min);
 
             ShowWindow(hStatic5,SW_HIDE);
-            DrawLine(hStatic4, num, n);                                //固定波形绘制
-            gnum = num;
+            DrawLine(hStatic4, input, n);                                //固定波形绘制
+            gnum = input;
             gn = n;
         }
 
@@ -137,7 +151,7 @@ STDMETHODIMP CCommandHandler::Execute(
 
     if (nCmdID == cmdButton4 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -161,17 +175,16 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            double* num = GetNum(fin, n);
+            input = GetNum(fin, n);
 
-            double average = Average(num, n);
-            double variance = Variance(num, n);
+            double average = Average(input, n);
+            double variance = Variance(input, n);
 
-            LPCTSTR str = L" 数据个数:\n   %i\n 均值:\n   %e\n 方差:\n   %e";
+            LPCTSTR str = L" 数据个数:\n   %i\n 均值:\n   %e\n 方差:\n   %e\n";
             swprintf_s(szBuffer, str, n, average, variance);
-
+            DrawLine(hStatic4, input, n);
             ShowWindow(hStatic5, SW_HIDE);
-            DrawLine(hStatic4, num, n);                              
-            gnum = num;
+            gnum = input;
             gn = n;
         }
 
@@ -179,7 +192,7 @@ STDMETHODIMP CCommandHandler::Execute(
 
     if (nCmdID == cmdButton5 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
-        a = nCmdID;
+        BtnNum = nCmdID;
         OPENFILENAME ofn;			// 公共对话框结构
         TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -203,18 +216,16 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            double* num = GetNum(fin, n);
+            input = GetNum(fin, n);
 
-            double kurtosis = Kurtosis(num, n);
+            double kurtosis = Kurtosis(input, n);
 
-            LPCTSTR str = L" 数据个数:\n   %i\n 峭度:\n   %e";
+            LPCTSTR str = L" 数据个数:\n   %i\n 峭度:\n   %e\n";
             swprintf_s(szBuffer, str, n, kurtosis);
-
-            ShowWindow(hStatic5, SW_HIDE);
-            DrawLine(hStatic4, num, n);                                //固定波形绘制
-            gnum = num;
+            DrawLine(hStatic4, input, n);
+            gnum = input;
             gn = n;
-
+            ShowWindow(hStatic5, SW_HIDE);
         }
 
     }
