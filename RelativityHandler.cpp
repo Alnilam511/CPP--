@@ -1,6 +1,6 @@
-#include <UIRibbon.h>
+ï»¿#include <UIRibbon.h>
 
-#include <fstream>   //Ìá¹©ÎÄ¼þÍ·ÎÄ¼þ
+#include <fstream>   //ï¿½á¹©ï¿½Ä¼ï¿½Í·ï¿½Ä¼ï¿½
 #include "GlobalVariable.h"
 #include "Functions.h"
 
@@ -26,15 +26,15 @@ STDMETHODIMP CRelativityHandler::Execute(
     if (nCmdID == cmdButton6 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
         BtnNum = nCmdID;
-        OPENFILENAME ofn;			// ¹«¹²¶Ô»°¿ò½á¹¹
-        TCHAR szFile[MAX_PATH];		// ±£´æ»ñÈ¡ÎÄ¼þÃû³ÆµÄ»º³åÇø
+        OPENFILENAME ofn;			// ï¿½ï¿½ï¿½ï¿½ï¿½Ô»ï¿½ï¿½ï¿½á¹¹
+        TCHAR szFile[MAX_PATH];		// ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ÆµÄ»ï¿½ï¿½ï¿½ï¿½ï¿½
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
         ofn.lStructSize = sizeof(OPENFILENAME);
         ofn.hwndOwner = NULL;
         ofn.lpstrFile = szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0"; //¹ýÂË¹æÔò
+        ofn.lpstrFilter = L"Text\0*.TXT\0"; //ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
@@ -53,11 +53,11 @@ STDMETHODIMP CRelativityHandler::Execute(
 
             double R = AutoCorrelation(num, n);
 
-            LPCTSTR str = L" Êý¾Ý¸öÊý:\n   %i\n ×ÔÏà¹ØÏµÊýÎª:\n   %.2f";
+            LPCTSTR str = L" ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½:\n   %i\n ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½Îª:\n   %.2f";
             swprintf_s(szBuffer, str, n, R);
 
             ShowWindow(hStatic5, SW_HIDE);
-            DrawLine(hStatic4, num, n);                                //¹Ì¶¨²¨ÐÎ»æÖÆ
+            DrawLine(hStatic4, num, n);                                //ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½
             gnum = num;
             gn = n;
         }
@@ -67,8 +67,8 @@ STDMETHODIMP CRelativityHandler::Execute(
     if (nCmdID == cmdButton7 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
         BtnNum = nCmdID;
-        OPENFILENAME ofn;			// ¹«¹²¶Ô»°¿ò½á¹¹
-        TCHAR szFile[MAX_PATH];		// ±£´æ»ñÈ¡ÎÄ¼þÃû³ÆµÄ»º³åÇø
+        OPENFILENAME ofn;			// ï¿½ï¿½ï¿½ï¿½ï¿½Ô»ï¿½ï¿½ï¿½á¹¹
+        TCHAR szFile[MAX_PATH];		// ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ÆµÄ»ï¿½ï¿½ï¿½ï¿½ï¿½
         TCHAR szPath[MAX_PATH];
         TCHAR szFileName1[MAX_PATH];
         TCHAR szFileName2[MAX_PATH];
@@ -79,7 +79,7 @@ STDMETHODIMP CRelativityHandler::Execute(
         ofn.lpstrFile = szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0"; //¹ýÂË¹æÔò
+        ofn.lpstrFilter = L"Text\0*.TXT\0"; //ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
@@ -100,20 +100,20 @@ STDMETHODIMP CRelativityHandler::Execute(
                 lstrcpyn(szPath, szFile, ofn.nFileOffset);              
                 lstrcat(szPath, TEXT("\\"));
 
-                p = szFile + ofn.nFileOffset; //°ÑÖ¸ÕëÒÆµ½µÚÒ»¸öÎÄ¼þ
+                p = szFile + ofn.nFileOffset; //ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä¼ï¿½
 
                 ZeroMemory(szFileName1, sizeof(szFileName1));
-                lstrcat(szFileName1, szPath);  //¸øÎÄ¼þÃû¼ÓÉÏÂ·¾¶  
-                lstrcat(szFileName1, p);    //¼ÓÉÏÎÄ¼þÃû
+                lstrcat(szFileName1, szPath);  //ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½  
+                lstrcat(szFileName1, p);    //ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
 
                 p = p + lstrlen(p) + 1;
 
                 ZeroMemory(szFileName2, sizeof(szFileName2));
-                lstrcat(szFileName2, szPath);  //¸øÎÄ¼þÃû¼ÓÉÏÂ·¾¶  
-                lstrcat(szFileName2, p);    //¼ÓÉÏÎÄ¼þÃû
+                lstrcat(szFileName2, szPath);  //ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½  
+                lstrcat(szFileName2, p);    //ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
 
                 ifstream fin1, fin2;
-                //»ñÈ¡ÎÄ¼þÊý¾Ý¸öÊý
+                //ï¿½ï¿½È¡ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½
                 fin1.open(szFileName1);
                 int n1 = GetLine(fin1);
                 fin1.close();
@@ -123,7 +123,7 @@ STDMETHODIMP CRelativityHandler::Execute(
                 fin2.close();
 
                 double num1[10240] = { 0 }, num2[10240] = { 0 };
-                //¶ÔÊý×é¸³Öµ
+                //ï¿½ï¿½ï¿½ï¿½ï¿½é¸³Öµ
                 fin1.open(szFileName1);
                 for (int i = 0; i < n1; i++)
                 {
@@ -140,12 +140,12 @@ STDMETHODIMP CRelativityHandler::Execute(
 
                 double R = CrossCorrelation(num1, num2, n1, n2);
 
-                LPCTSTR str = L" Êý¾Ý¸öÊý:\n   %i\n »¥Ïà¹ØÏµÊý:\n   %.2f";
+                LPCTSTR str = L" ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½:\n   %i\n ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½:\n   %.2f";
                 swprintf_s(szBuffer, str, n1, R);
                 ShowWindow(hStatic5, SW_SHOWDEFAULT);
                 DrawLine(hStatic4, num1, n1);
                 DrawLine(hStatic5, num2, n2);
-                gn = n1;                                                          //Ë«´°¿Úgnum£¬gnum1¸³Öµ
+                gn = n1;                                                          //åŒçª—å£gnumï¼Œgnum1èµ‹å€¼
                 gn1 = n2;
                 gnum = new double[gn];
                 gnum1 = new double[gn1];
@@ -160,7 +160,7 @@ STDMETHODIMP CRelativityHandler::Execute(
             }
             else
             {
-                MessageBox(NULL, L"ÇëÑ¡ÔñÁ½¸öÊý¾ÝÎÄ¼þ", L"ÌáÊ¾", MB_OK);
+                MessageBox(NULL, L"ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½", L"ï¿½ï¿½Ê¾", MB_OK);
             }            
         }
     }
