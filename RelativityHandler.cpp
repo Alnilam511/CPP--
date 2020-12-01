@@ -1,6 +1,6 @@
 ﻿#include <UIRibbon.h>
 
-#include <fstream>   //�ṩ�ļ�ͷ�ļ�
+#include <fstream>   //提供文件头文件
 #include "GlobalVariable.h"
 #include "Functions.h"
 
@@ -26,15 +26,15 @@ STDMETHODIMP CRelativityHandler::Execute(
     if (nCmdID == cmdButton6 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
         BtnNum = nCmdID;
-        OPENFILENAME ofn;			// �����Ի���ṹ
-        TCHAR szFile[MAX_PATH];		// �����ȡ�ļ����ƵĻ�����
+        OPENFILENAME ofn;			// 公共对话框结构
+        TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
         ofn.lStructSize = sizeof(OPENFILENAME);
         ofn.hwndOwner = NULL;
         ofn.lpstrFile = szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0"; //���˹���
+        ofn.lpstrFilter = L"Text\0*.TXT\0"; //过滤规则
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
@@ -53,13 +53,16 @@ STDMETHODIMP CRelativityHandler::Execute(
 
             double R = AutoCorrelation(num, n);
 
-            LPCTSTR str = L" ���ݸ���:\n   %i\n �����ϵ��Ϊ:\n   %.2f";
+            LPCTSTR str = L" 数据个数:\n   %i\n 自相关系数为:\n   %.2f";
             swprintf_s(szBuffer, str, n, R);
 
             ShowWindow(hStatic5, SW_HIDE);
-            DrawLine(hStatic4, num, n);                                //�̶����λ���
+            ShowWindow(hStatic7, SW_HIDE);
+            DrawLine(hStatic4, num, n);                                
             gnum = num;
             gn = n;
+            CanvasStatus = 1;
+            SetWindowText(hStatic2, szBuffer);
         }
 
     }
@@ -67,8 +70,8 @@ STDMETHODIMP CRelativityHandler::Execute(
     if (nCmdID == cmdButton7 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
         BtnNum = nCmdID;
-        OPENFILENAME ofn;			// �����Ի���ṹ
-        TCHAR szFile[MAX_PATH];		// �����ȡ�ļ����ƵĻ�����
+        OPENFILENAME ofn;			// 公共对话框结构
+        TCHAR szFile[MAX_PATH];		// 保存获取文件名称的缓冲区
         TCHAR szPath[MAX_PATH];
         TCHAR szFileName1[MAX_PATH];
         TCHAR szFileName2[MAX_PATH];
@@ -79,7 +82,7 @@ STDMETHODIMP CRelativityHandler::Execute(
         ofn.lpstrFile = szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0"; //���˹���
+        ofn.lpstrFilter = L"Text\0*.TXT\0"; //过滤规则
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
@@ -100,20 +103,20 @@ STDMETHODIMP CRelativityHandler::Execute(
                 lstrcpyn(szPath, szFile, ofn.nFileOffset);              
                 lstrcat(szPath, TEXT("\\"));
 
-                p = szFile + ofn.nFileOffset; //��ָ���Ƶ���һ���ļ�
+                p = szFile + ofn.nFileOffset; //把指针移到第一个文件
 
                 ZeroMemory(szFileName1, sizeof(szFileName1));
-                lstrcat(szFileName1, szPath);  //���ļ�������·��  
-                lstrcat(szFileName1, p);    //�����ļ���
+                lstrcat(szFileName1, szPath);  //给文件名加上路径  
+                lstrcat(szFileName1, p);    //加上文件名
 
                 p = p + lstrlen(p) + 1;
 
                 ZeroMemory(szFileName2, sizeof(szFileName2));
-                lstrcat(szFileName2, szPath);  //���ļ�������·��  
-                lstrcat(szFileName2, p);    //�����ļ���
+                lstrcat(szFileName2, szPath); //给文件名加上路径 
+                lstrcat(szFileName2, p);    //加上文件名
 
                 ifstream fin1, fin2;
-                //��ȡ�ļ����ݸ���
+                //获取文件数据个数
                 fin1.open(szFileName1);
                 int n1 = GetLine(fin1);
                 fin1.close();
@@ -123,7 +126,7 @@ STDMETHODIMP CRelativityHandler::Execute(
                 fin2.close();
 
                 double num1[10240] = { 0 }, num2[10240] = { 0 };
-                //�����鸳ֵ
+                //对数组赋值
                 fin1.open(szFileName1);
                 for (int i = 0; i < n1; i++)
                 {
@@ -140,15 +143,18 @@ STDMETHODIMP CRelativityHandler::Execute(
 
                 double R = CrossCorrelation(num1, num2, n1, n2);
 
-                LPCTSTR str = L" ���ݸ���:\n   %i\n �����ϵ��:\n   %.2f";
+                LPCTSTR str = L" 数据个数:\n   %i\n 互相关系数:\n   %.2f";
                 swprintf_s(szBuffer, str, n1, R);
                 ShowWindow(hStatic5, SW_SHOWDEFAULT);
+                ShowWindow(hStatic7, SW_SHOWDEFAULT);
                 DrawLine(hStatic4, num1, n1);
                 DrawLine(hStatic5, num2, n2);
                 gn = n1;                                                          //双窗口gnum，gnum1赋值
                 gn1 = n2;
                 gnum = new double[gn];
                 gnum1 = new double[gn1];
+                CanvasStatus = 3;
+                SetWindowText(hStatic2, szBuffer);
                 for (int i = 0; i < gn; i++)
                 {
                     gnum[i] = num1[i];
@@ -160,7 +166,7 @@ STDMETHODIMP CRelativityHandler::Execute(
             }
             else
             {
-                MessageBox(NULL, L"��ѡ�����������ļ�", L"��ʾ", MB_OK);
+                MessageBox(NULL, L"请选择两个数据文件", L"提示", MB_OK);
             }            
         }
     }

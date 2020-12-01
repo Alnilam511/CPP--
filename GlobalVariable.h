@@ -2,7 +2,7 @@
 
 extern int BtnNum;
 extern TCHAR szBuffer[MAX_PATH];
-extern double* input; 
+extern HWND hStatic2;
 extern HWND hStatic4;
 extern HWND hStatic5;
 extern HWND hStatic6;
@@ -17,4 +17,4 @@ extern int gn;
 extern int gn1;
 extern POINT* aptt;
 extern POINT* apt;
-
+extern int CanvasStatus;

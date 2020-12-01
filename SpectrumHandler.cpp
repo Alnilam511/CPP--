@@ -87,6 +87,8 @@ STDMETHODIMP CSpectrumHandler::Execute(
             OutFile.close();
             LPCTSTR str = L" 数据个数:\n   %i\n";
             swprintf_s(szBuffer, str, n);
+            ShowWindow(hStatic5, SW_HIDE);
+            ShowWindow(hStatic7, SW_HIDE);
         }          
     }
 

@@ -24,7 +24,6 @@ using namespace std;
  POINT* apt;
  POINT* aptt;
 
- double* input;
 
  void DrawLine(HWND hWnd, double* num, int n)                          //固定波形绘制，num波形数组，n数组长度
  {
@@ -129,22 +128,25 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            input = GetNum(fin, n);
+            double* num = GetNum(fin, n);
 
-            double min = input[0], max = input[0];
+            double min = num[0], max = num[0];
             for (int i = 1; i < n; i++)
             {
-                max = Maximum(max, input[i]);
-                min = Minimum(min, input[i]);
+                max = Maximum(max, num[i]);
+                min = Minimum(min, num[i]);
             }
             
             LPCTSTR str = L" 数据个数:\n   %i\n 峰值为:\n   %e\n   %e\n";
             swprintf_s(szBuffer, str, n, max, min);
 
             ShowWindow(hStatic5,SW_HIDE);
-            DrawLine(hStatic4, input, n);                                //固定波形绘制
-            gnum = input;
+            ShowWindow(hStatic7, SW_HIDE);
+            DrawLine(hStatic4, num, n);                                //固定波形绘制
+            gnum = num;
             gn = n;
+            CanvasStatus = 1;
+            SetWindowText(hStatic2, szBuffer);
         }
 
     }
@@ -175,17 +177,20 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            input = GetNum(fin, n);
+            double* num = GetNum(fin, n);
 
-            double average = Average(input, n);
-            double variance = Variance(input, n);
+            double average = Average(num, n);
+            double variance = Variance(num, n);
 
             LPCTSTR str = L" 数据个数:\n   %i\n 均值:\n   %e\n 方差:\n   %e\n";
             swprintf_s(szBuffer, str, n, average, variance);
-            DrawLine(hStatic4, input, n);
+            DrawLine(hStatic4, num, n);
             ShowWindow(hStatic5, SW_HIDE);
-            gnum = input;
+            ShowWindow(hStatic7, SW_HIDE);
+            gnum = num;
             gn = n;
+            CanvasStatus = 1;
+            SetWindowText(hStatic2, szBuffer);
         }
 
     }
@@ -216,16 +221,19 @@ STDMETHODIMP CCommandHandler::Execute(
             fin.close();
 
             fin.open(szFile);
-            input = GetNum(fin, n);
+            double* num = GetNum(fin, n);
 
-            double kurtosis = Kurtosis(input, n);
+            double kurtosis = Kurtosis(num, n);
 
             LPCTSTR str = L" 数据个数:\n   %i\n 峭度:\n   %e\n";
             swprintf_s(szBuffer, str, n, kurtosis);
-            DrawLine(hStatic4, input, n);
-            gnum = input;
+            DrawLine(hStatic4, num, n);
+            gnum = num;
             gn = n;
             ShowWindow(hStatic5, SW_HIDE);
+            ShowWindow(hStatic7, SW_HIDE);
+            CanvasStatus = 1;
+            SetWindowText(hStatic2, szBuffer);
         }
 
     }

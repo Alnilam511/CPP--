@@ -19,6 +19,7 @@ TCHAR szBuffer0[MAX_PATH];
 TCHAR szBuffer[MAX_PATH];
 TCHAR szBuffer1[MAX_PATH];
 HWND hStatic8;
+HWND hStatic2;
 
 HINSTANCE hInst;                                
 WCHAR wszTitle[MAX_LOADSTRING];                 
@@ -30,7 +31,13 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 ULONG_PTR m_gdiplusToken;
 POINT pt;
 POINT ptt;
-int ismove = 0;                                   // 0不移动，1在hstatic4，2在hstatic5
+POINT pt1;
+POINT ptt1;
+POINT pt0;
+int ismove = 0;                                   // 点击位置判断，0窗口外，1在hstatic4，2在hstatic5
+
+int CanvasStatus = 0;                  //画布状态判断 |  1  |  2  |  3  |  4  |  5  |  6  |    上为int数字，下为对应状态
+                                       //             |  4  |  4' | 4,5 | 4',5| 4,5'|4',5'|    4：窗口4，5：窗口5，带 ' ：局部放大状态
 int m;
 
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -152,7 +159,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 #define btn1 1
 #define btn2 2
 
-void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
+void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 {
     int k, l;
     HDC hdc = GetDC(hWnd);
@@ -160,24 +167,24 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     k = l = 0;
     long i, j;
     int n=0;
-    if (ptt1.x > 900)
+    if (ptty.x > 900)
     {
-        ptt1.x = 900;
+        ptty.x = 900;
     }
-    if (ptt1.x < 0)
+    if (ptty.x < 0)
     {
-        ptt1.x = 0;
+        ptty.x = 0;
     }
-    if (ptt1.y >80)
+    if (ptty.y >80)
     {
-        ptt1.y = 80;
+        ptty.y = 80;
     }
-    if (ptt1.y < 0)
+    if (ptty.y < 0)
     {
-        ptt1.y = 0;
+        ptty.y = 0;
     }
-    i= min(pt1.x, ptt1.x);
-    j= max(pt1.x, ptt1.x);
+    i= min(ptx.x, ptty.x);
+    j= max(ptx.x, ptty.x);
     rect.left = i;
     rect.right = j;
     HBRUSH hbrush = CreateSolidBrush(RGB(255, 255, 255));
@@ -185,14 +192,22 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
     DeleteObject(hbrush);
     POINT* apt0;
     apt0 = new POINT;
+    double* input=NULL;
     if (ismove == 1)
     {
         apt0 = aptt;
+        input = gnum;
     }
-    if (ismove == 2)
+    else
     {
-        apt0 = apt;
+       if (ismove == 2)
+       {
+         apt0 = apt;        
+         input = gnum1;
+
+       }
     }
+   
     while (i > apt0[k].x)
     {
         k++;
@@ -218,7 +233,6 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
         }
         str = L" 局部数据个数为：\n   %i\n 局部峰值为:\n   %e\n   %e\n";
         swprintf_s(szBuffer1, str, m + 1, max, min);
-        SetWindowText(hStatic8, szBuffer1);
         break;
     }        
     case cmdButton4:
@@ -227,7 +241,6 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
         double variance = Variance(part, m + 1);
         str = L" 局部数据个数:\n   %i\n 局部均值:\n   %e\n 局部方差:\n   %e\n";
         swprintf_s(szBuffer1, str, m + 1, average, variance);
-        SetWindowText(hStatic8, szBuffer1);
         break;
     }        
     case cmdButton5:
@@ -235,7 +248,6 @@ void Drawlinemk2(HWND hWnd, POINT pt1, POINT ptt1)
         double kurtosis = Kurtosis(part, m + 1);
         str = L" 局部数据个数:\n   %i\n 局部峭度:\n   %e\n";
         swprintf_s(szBuffer1, str, m + 1, kurtosis);
-        SetWindowText(hStatic8, szBuffer1);
         break;
     }        
     }
@@ -310,7 +322,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     HDC hdcStatic;
     static HFONT hFont;
     static HWND hStatic1;
-    static HWND hStatic2;
     static HWND hStatic3;
     bool initSuccess;
 
@@ -374,12 +385,73 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
+        if (ismove == 0)
+        {
+            switch (CanvasStatus)
+            {
+            case 1:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                return 0;
+            }
+            case 2:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                ismove = 1;
+                Drawlinemk2(hStatic4, pt, ptt);
+                Drawlinemk3(hStatic4);
+                ismove = 0;
+                return 0;
+            }
+            case 3:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                DrawLine(hStatic5, gnum1, gn1);
+                return 0;
+            }
+            case 4:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                ismove = 1;
+                Drawlinemk2(hStatic4, pt, ptt);
+                Drawlinemk3(hStatic4);
+                ismove = 0;
+                DrawLine(hStatic5, gnum1, gn1);
+                return 0;
+            }
+            case 5:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                DrawLine(hStatic5, gnum1, gn1);
+                ismove = 2;
+                Drawlinemk2(hStatic5, pt1, ptt1);
+                Drawlinemk3(hStatic5);
+                ismove = 0;
+                return 0;
+            }
+            case 6:
+            {
+                DrawLine(hStatic4, gnum, gn);
+                ismove = 1;
+                Drawlinemk2(hStatic4, pt, ptt);
+                Drawlinemk3(hStatic4);
+                DrawLine(hStatic5, gnum1, gn1);
+                ismove = 2;
+                Drawlinemk2(hStatic5, pt1, ptt1);
+                Drawlinemk3(hStatic5);
+                ismove = 0;
+                return 0;
+            }
+
+            }
+        }
         EndPaint(hWnd, &ps);
         break;
     }        
 
     case WM_LBUTTONDOWN: 
     {
+        pt0 = pt;
         GetCursorPos(&pt);
         GetWindowRect(hStatic4, &rect);
         if (PtInRect(&rect, pt))
@@ -390,18 +462,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         else
         {
             GetWindowRect(hStatic5, &rect);
-            if (PtInRect(&rect, pt))
+            if (PtInRect(&rect, pt)&&IsWindowVisible(hStatic5))
             {
-                ScreenToClient(hStatic5, &pt);
+                pt1 = pt;
+                pt = pt0;
+                ScreenToClient(hStatic5, &pt1);
                 ismove = 2;
             }
             else
             {
                 ismove = 0;
+                pt = pt0;
             }
 
         }
-        break;
+        return 0;
     }
 
     case WM_LBUTTONUP:
@@ -409,13 +484,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (ismove == 1)
         {
             Drawlinemk3(hStatic4);
+            switch (CanvasStatus)
+            {
+                case 1:
+                {
+                    CanvasStatus = 2;
+                    break;
+                }
+                case 3:
+                {
+                    CanvasStatus = 4;
+                    break;
+                }
+                case 5:
+                {
+                    CanvasStatus = 6;
+                    break;
+                }
+            }
+            
         }
         if (ismove == 2)
         {
             Drawlinemk3(hStatic5);
+            switch (CanvasStatus)
+            {
+                case 3:
+                {
+                    CanvasStatus = 5;
+                    break;
+                }
+                case 4:
+                {
+                    CanvasStatus = 6;
+                    break;
+                }
+            }
         }
         ismove = 0;
-        break;
+        return 0;
     }
 
     case WM_MOUSEMOVE: 
@@ -426,15 +533,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ScreenToClient(hStatic4, &ptt);
             DrawLine(hStatic4, gnum, gn);
             Drawlinemk2(hStatic4, pt, ptt);
+            SetWindowText(hStatic8, szBuffer1);
         }
         if (ismove == 2)
         {
-            GetCursorPos(&ptt);
-            ScreenToClient(hStatic5, &ptt);
+            GetCursorPos(&ptt1);
+            ScreenToClient(hStatic5, &ptt1);
             DrawLine(hStatic5, gnum1, gn1);
-            Drawlinemk2(hStatic5, pt, ptt);
+            Drawlinemk2(hStatic5, pt1, ptt1);
+            SetWindowText(hStatic8, szBuffer1);
         }
-        break;
+        return 0;
     }
         
     case WM_DESTROY:
@@ -449,28 +558,5 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
-
-    switch (BtnNum)
-    {
-    case cmdButton3:
-    case cmdButton4:
-    case cmdButton5:
-    case cmdButton6:
-    case cmdButton7:
-    case cmdButton8:
-    case cmdButton9:
-    case cmdButton10:
-    case cmdButton11:
-    case cmdButton12:
-    case cmdButton13:
-    case cmdButton14:
-    case cmdButton15:
-    case cmdButton16:
-        SetWindowText(hStatic2, szBuffer);
-        break;
-    }
-
     return 0;
 }
-
-
