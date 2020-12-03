@@ -221,6 +221,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="CommandHandler.h" />
+    <ClInclude Include="EMD.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="RelativityHandler.h" />
     <ClInclude Include="Resource.h" />

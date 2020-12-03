@@ -39,12 +39,15 @@ int ismove = 0;                                   // 点击位置判断，0窗口外，1在h
 int CanvasStatus = 0;                  //画布状态判断 |  1  |  2  |  3  |  4  |  5  |  6  |    上为int数字，下为对应状态
                                        //             |  4  |  4' | 4,5 | 4',5| 4,5'|4',5'|    4：窗口4，5：窗口5，带 ' ：局部放大状态
 int m;
+HANDLE hOut;
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPSTR     lpCmdLine,
                      int       nCmdShow)
 {
+    AllocConsole();
+    hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -242,18 +245,19 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         str = L" 局部数据个数:\n   %i\n 局部均值:\n   %e\n 局部方差:\n   %e\n";
         swprintf_s(szBuffer1, str, m + 1, average, variance);
         break;
-    }        
+    }
     case cmdButton5:
     {
         double kurtosis = Kurtosis(part, m + 1);
         str = L" 局部数据个数:\n   %i\n 局部峭度:\n   %e\n";
         swprintf_s(szBuffer1, str, m + 1, kurtosis);
         break;
-    }        
+    }
     }
 
+    delete[]apt1;
     apt1 = new POINT[m];
-    
+
     while (n<m)
     {
         apt1[n] = apt0[k];
@@ -312,6 +316,7 @@ void Drawlinemk3(HWND hWnd){
     }
     Polyline(hdc, apt2, m);
     DeleteObject(hpen);
+    delete[]apt2;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -354,27 +359,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hStatic8 = CreateWindow(TEXT("STATIC"), TEXT(""),
             WS_CHILD | WS_VISIBLE,
-            20, 360, 143, 130, hWnd, (HMENU)3, NULL, NULL);
+            20, 360, 143, 130, hWnd, (HMENU)8, NULL, NULL);
 
         hStatic4 = CreateWindow(TEXT("STATIC"), TEXT(""),
             WS_CHILD | WS_VISIBLE ,
-            200, 170, 900, 80, hWnd, (HMENU)3, NULL, NULL);
+            200, 170, 900, 80, hWnd, (HMENU)4, NULL, NULL);
 
         hStatic5 = CreateWindow(TEXT("STATIC"), TEXT(""),
             WS_CHILD | WS_VISIBLE ,
-            200, 430, 900, 80, hWnd, (HMENU)3, NULL, NULL);
+            200, 430, 900, 80, hWnd, (HMENU)5, NULL, NULL);
 
         hStatic6 = CreateWindow(TEXT("STATIC"), TEXT(""),
             WS_CHILD | WS_VISIBLE,
-            200, 250, 900, 180, hWnd, (HMENU)3, NULL, NULL);
+            200, 250, 900, 180, hWnd, (HMENU)6, NULL, NULL);
 
         hStatic7 = CreateWindow(TEXT("STATIC"), TEXT(""),
             WS_CHILD | WS_VISIBLE,
-            200, 510, 900, 180, hWnd, (HMENU)3, NULL, NULL);
+            200, 510, 900, 180, hWnd, (HMENU)7, NULL, NULL);
 
         SendMessage(hStatic1, WM_SETFONT, (WPARAM)hFont, NULL);
         SendMessage(hStatic2, WM_SETFONT, (WPARAM)hFont, NULL);
         SendMessage(hStatic8, WM_SETFONT, (WPARAM)hFont, NULL);
+
 
     case WM_CTLCOLORSTATIC: 
     {
@@ -385,6 +391,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
+        WriteConsole(hOut, L"111 \n", 6, NULL, NULL);
         if (ismove == 0)
         {
             switch (CanvasStatus)
@@ -392,7 +399,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case 1:
             {
                 DrawLine(hStatic4, gnum, gn);
-                return 0;
+                break;
             }
             case 2:
             {
@@ -401,13 +408,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 Drawlinemk2(hStatic4, pt, ptt);
                 Drawlinemk3(hStatic4);
                 ismove = 0;
-                return 0;
+                break;
             }
             case 3:
             {
                 DrawLine(hStatic4, gnum, gn);
                 DrawLine(hStatic5, gnum1, gn1);
-                return 0;
+                break;
             }
             case 4:
             {
@@ -417,7 +424,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 Drawlinemk3(hStatic4);
                 ismove = 0;
                 DrawLine(hStatic5, gnum1, gn1);
-                return 0;
+                break;
             }
             case 5:
             {
@@ -427,7 +434,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 Drawlinemk2(hStatic5, pt1, ptt1);
                 Drawlinemk3(hStatic5);
                 ismove = 0;
-                return 0;
+                break;
             }
             case 6:
             {
@@ -440,7 +447,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 Drawlinemk2(hStatic5, pt1, ptt1);
                 Drawlinemk3(hStatic5);
                 ismove = 0;
-                return 0;
+                break;
             }
 
             }

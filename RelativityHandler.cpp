@@ -42,7 +42,7 @@ STDMETHODIMP CRelativityHandler::Execute(
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER;
 
         if (GetOpenFileName(&ofn))
-        {            
+        {
             ifstream fin;
             fin.open(szFile);
             int n = GetLine(fin);
@@ -58,11 +58,12 @@ STDMETHODIMP CRelativityHandler::Execute(
 
             ShowWindow(hStatic5, SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
-            DrawLine(hStatic4, num, n);                                
+            DrawLine(hStatic4, num, n);
             gnum = num;
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }
 
     }
@@ -154,7 +155,6 @@ STDMETHODIMP CRelativityHandler::Execute(
                 gnum = new double[gn];
                 gnum1 = new double[gn1];
                 CanvasStatus = 3;
-                SetWindowText(hStatic2, szBuffer);
                 for (int i = 0; i < gn; i++)
                 {
                     gnum[i] = num1[i];
@@ -162,7 +162,9 @@ STDMETHODIMP CRelativityHandler::Execute(
                 for (int i = 0; i < gn1; i++)
                 {
                     gnum1[i] = num2[i];
-                }
+                }                
+                SetWindowText(hStatic2, szBuffer);
+                SetWindowText(hStatic8, NULL);
             }
             else
             {

@@ -11,7 +11,8 @@
 #include <fft.h>            //调用SP++信号库- 傅里叶变换函数
 #include <wft.h>            //加窗函数->短时傅里叶
 #include <cwt.h>            //小波变换
-//#include "WaveletPack.h"    //小波包变换
+#include "WaveletPack.h"    //小波包变换
+#include "EMD.h"            //经验模态分解
 
 #include "SpectrumHandler.h"
 #include "SimpleRibbonUI.h"
@@ -68,16 +69,16 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             fin.open(szFile);
             double* num = GetNum(fin, n);
-
-            ofstream OutFile("ttttry.txt");
+                        
             for (int i = 0; i < n; i++)
             {
                 xn.resize(n);
                 xn[i] = num[i];
             }
-            DrawLine(hStatic4, num, n);
+
             Xk = fftr2c(xn);
 
+            ofstream OutFile("SPS.txt");
             for (int i = 0; i < n; ++i)
             {
                 num[i] = abs(Xk[i])* abs(Xk[i]);
@@ -85,10 +86,11 @@ STDMETHODIMP CSpectrumHandler::Execute(
                 OutFile << num[i] << endl;
             }
             OutFile.close();
+
             LPCTSTR str = L" 数据个数:\n   %i\n";
             swprintf_s(szBuffer, str, n);
-            ShowWindow(hStatic5, SW_HIDE);
-            ShowWindow(hStatic7, SW_HIDE);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }          
     }
 
@@ -172,7 +174,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
                 Xk = fftr2c(xn);
                 Yk = fftr2c(yn);
 
-                ofstream OutFile("ttttry.txt");
+                ofstream OutFile("CPS.txt");
                 for (int i = 0; i < n; ++i)
                 {
                     double xr = real(Xk[i]);
@@ -180,13 +182,15 @@ STDMETHODIMP CSpectrumHandler::Execute(
                     double yr = real(Yk[i]);
                     double yi = imag(Yk[i]);
                     Zk.resize(n);
-                    Zk[i] = complex<Type>(xr * yr + xi * yi, xr * yi - yr * xi);
+                    Zk[i] = complex<Type>(xr * yr + xi * yi, - xr * yi + yr * xi);
                     OutFile << setiosflags(ios::fixed) << setprecision(4);
                     OutFile << Zk[i] << endl;
                 }
                 OutFile.close();
                 LPCTSTR str = L" 数据个数:\n   %i\n";
                 swprintf_s(szBuffer, str, n);
+                SetWindowText(hStatic2, szBuffer);
+                SetWindowText(hStatic8, NULL);
             }
             else
             {
@@ -227,7 +231,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
             fin.open(szFile);
             double* num = GetNum(fin, n);
 
-            ofstream OutFile("ttttry.txt");
+            ofstream OutFile("CEP.txt");
             for (int i = 0; i < n; i++)
             {
                 xn.resize(n);
@@ -253,11 +257,14 @@ STDMETHODIMP CSpectrumHandler::Execute(
             OutFile.close();
             LPCTSTR str = L" 数据个数:\n   %i\n";
             swprintf_s(szBuffer, str, n);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }
     }
 
     if (nCmdID == cmdButton11 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
+        BtnNum = nCmdID;
         OPENFILENAME ofn;
         TCHAR szFile[MAX_PATH];
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -281,12 +288,12 @@ STDMETHODIMP CSpectrumHandler::Execute(
             const int Fs = 1000;
 
             Type c = 0;
-            Type b = Ls - 1;
+            Type b = Ls - 1.0;
             Vector<Type> t = linspace(c, b, Ls) / Type(Fs);
             Vector<Type> s = sin(Type(400 * PI) * pow(t, Type(2.0)));
 
             c = 0;
-            b = Type(Lg - 1);
+            b = Type(Lg - 1.0);
             Type u = (Lg - 1) / Type(2);
             Type r = Lg / Type(8);
             t = linspace(c, b, Lg);
@@ -300,11 +307,14 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             LPCTSTR str = L"短时傅里叶变换已完成，数据文件已输出";
             swprintf_s(szBuffer, str);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }        
     }
 
     if (nCmdID == cmdButton12 && verb == UI_EXECUTIONVERB_EXECUTE)
     {
+        BtnNum = nCmdID;
         OPENFILENAME ofn;
         TCHAR szFile[MAX_PATH];
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -339,14 +349,228 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             LPCTSTR str = L"小波分析已完成，数据文件已输出";
             swprintf_s(szBuffer, str);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }
     }
 
-    //if (nCmdID == cmdButton13 && verb == UI_EXECUTIONVERB_EXECUTE)
+    if (nCmdID == cmdButton13 && verb == UI_EXECUTIONVERB_EXECUTE)
+    {
+        BtnNum = nCmdID;
+        OPENFILENAME ofn;
+        TCHAR szFile[MAX_PATH];
+        TCHAR* p;
+        ZeroMemory(&ofn, sizeof(OPENFILENAME));
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFile = szFile;
+        ofn.lpstrFile[0] = '\0';
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = L"Text\0*.TXT\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileName(&ofn))
+        {       
+            int dbN = 1, stages = 3, numf = 1, j;
+            float thrshold = 0.5;
+            FILE* fp, * fp1;
+
+            p = szFile + ofn.nFileOffset;
+            char nchar[256] = { 0 };
+            WideCharToMultiByte(CP_ACP, 0, p, -1, nchar, 256, NULL, NULL);
+            const char* constc = nullptr;
+            constc = nchar;
+
+            if ((fp = fopen(constc, "r")) == NULL)
+            {
+                printf("cann't open input file\n");
+                exit(-3);
+            }
+            for (j = 0; j < datalen; j++)
+                fscanf_s(fp, "%f", &dataio[j]);
+
+            // wavelet transformation
+            dwpt_filter(dbN, stages, numf, thrshold);
+
+            // out put result
+            if ((fp1 = fopen("WaveletPackOutput.txt", "w+")) == NULL)
+            {
+                printf("cann't open output file\n");
+                exit(-4);
+            }
+            for (j = 0; j < datalen; j++)
+                fprintf(fp1, "%10.4f\n", dataio[j]);
+
+            fclose(fp);
+            fclose(fp1);
+
+            LPCTSTR str = L"小波包分析已完成，数据文件已输出";
+            swprintf_s(szBuffer, str);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
+        }
+    }
+
+    if (nCmdID == cmdButton14 && verb == UI_EXECUTIONVERB_EXECUTE)
+    {
+        BtnNum = nCmdID;
+        OPENFILENAME ofn;
+        TCHAR szFile[MAX_PATH];
+        ZeroMemory(&ofn, sizeof(OPENFILENAME));
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFile = szFile;
+        ofn.lpstrFile[0] = '\0';
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = L"Text\0*.TXT\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileName(&ofn))
+        {
+            int i, k;
+            typedef double Type;
+            Vector < complex<Type> > Xk, Yk;
+            Vector <Type> xn;
+
+            ifstream fin;
+            fin.open(szFile);
+            int n = GetLine(fin);
+            fin.close();
+
+            fin.open(szFile);
+            double* s = GetNum(fin, n);
+            for (i = 0; i < n; i++)
+            {
+                xn.resize(n);
+                xn[i] = s[i];
+                s[i] = 0;
+            }
+            fin.close();
+
+            Xk = fftr2c(xn);
+
+            if ((n > 0) && ((2 * floor(n / 2)) == (n))) // n is even
+            {
+                s[0] = 1;
+                s[n / 2] = 1;
+
+                for (k = 1; k < n / 2; k++)
+                {
+                    s[k] = 2;
+                }
+            }
+            else //n is odd
+            {
+                if (n > 0)
+                {
+                    s[0] = 1;
+
+                    for (k = 1; k < (n + 1) / 2; k++)
+                    {
+                        s[k] = 2;
+                    }
+                }
+            }
+
+            for (i = 0; i < n; i++)
+            {
+                double xr = real(Xk[i]);
+                double xi = imag(Xk[i]);
+                xr = xr * s[i];
+                xi = xi * s[i];
+                Xk.resize(n);
+                Xk[i] = complex<Type>(xr, xi);
+            }
+
+            Yk = ifftc2c(Xk);
+
+            ofstream OutFile("Hilbert.txt");
+            for (i = 0; i < n; i++)
+            {
+                double yi = imag(Yk[i]);
+                OutFile << setiosflags(ios::fixed) << setprecision(4);
+                OutFile << yi << endl;
+            }
+            OutFile.close();
+
+            LPCTSTR str = L"希尔伯特变换已完成，数据文件已输出";
+            swprintf_s(szBuffer, str);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
+        }
+    }
+
+    if (nCmdID == cmdButton15 && verb == UI_EXECUTIONVERB_EXECUTE)
+    {
+        BtnNum = nCmdID;
+        OPENFILENAME ofn;
+        TCHAR szFile[MAX_PATH];
+        ZeroMemory(&ofn, sizeof(OPENFILENAME));
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFile = szFile;
+        ofn.lpstrFile[0] = '\0';
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = L"Text\0*.TXT\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileName(&ofn))
+        {           
+            ifstream fin;
+            fin.open(szFile);
+            int n = GetLine(fin);
+            fin.close();
+
+            fin.open(szFile);
+            double* s = GetNum(fin, n);
+            double t[10240] = { 0 };
+            double yp1, ypn;   //一阶导数值
+
+            for (int i = 0; i < n; i++)
+            {
+                t[i] = 1.0*i / n;
+            }
+
+            yp1 = s[0] / t[0];
+            ypn = s[n] / t[n];
+
+            double* y2 = spline1(t, s, n, yp1, ypn);
+            double yn[10240];
+
+            ofstream OutFile("EMD.txt");
+            for (int i = 0; i < n; i++)
+            {
+                double x = t[i];
+                double y = spline2(t, s, y2, n, x);
+                yn[i] = y;
+                OutFile << setiosflags(ios::fixed) << setprecision(4);
+                OutFile << yn[i] << endl;
+            }          
+
+            LPCTSTR str = L"经验模态已完成，数据文件已输出";
+            swprintf_s(szBuffer, str);
+            SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
+        }
+    }
+
+    //if (nCmdID == cmdButton16 && verb == UI_EXECUTIONVERB_EXECUTE)
     //{
+    //    //BtnNum = nCmdID;
     //    OPENFILENAME ofn;
     //    TCHAR szFile[MAX_PATH];
-    //    TCHAR* p;
     //    ZeroMemory(&ofn, sizeof(OPENFILENAME));
     //    ofn.lStructSize = sizeof(OPENFILENAME);
     //    ofn.hwndOwner = NULL;
@@ -361,115 +585,10 @@ STDMETHODIMP CSpectrumHandler::Execute(
     //    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
     //    if (GetOpenFileName(&ofn))
-    //    {       
-    //        int dbN = 1, stages = 3, numf = 1, j;
-    //        float thrshold = 0.5;
-    //        FILE* fp, * fp1;
+    //    {
 
-    //        p = szFile + ofn.nFileOffset;
-    //        char nchar[256] = { 0 };
-    //        WideCharToMultiByte(CP_ACP, 0, p, -1, nchar, 256, NULL, NULL);
-    //        const char* constc = nullptr;
-    //        constc = nchar;
-
-    //        if ((fp = fopen(constc, "r")) == NULL)
-    //        {
-    //            printf("cann't open input file\n");
-    //            exit(-3);
-    //        }
-    //        for (j = 0; j < datalen; j++)
-    //            fscanf_s(fp, "%f", &dataio[j]);
-
-    //         wavelet transformation
-    //        dwpt_filter(dbN, stages, numf, thrshold);
-
-    //         out put result
-    //        if ((fp1 = fopen("WaveletPackOutput.txt", "w+")) == NULL)
-    //        {
-    //            printf("cann't open output file\n");
-    //            exit(-4);
-    //        }
-    //        for (j = 0; j < datalen; j++)
-    //            fprintf(fp1, "%10.4f\n", dataio[j]);
-
-    //        fclose(fp);
-    //        fclose(fp1);
-
-    //        LPCTSTR str = L"小波包分析已完成，数据文件已输出";
-    //        swprintf_s(szBuffer, str);
-
-    //        return 1;
     //    }
     //}
-
-    if (nCmdID == cmdButton14 && verb == UI_EXECUTIONVERB_EXECUTE)
-    {
-        OPENFILENAME ofn;
-        TCHAR szFile[MAX_PATH];
-        ZeroMemory(&ofn, sizeof(OPENFILENAME));
-        ofn.lStructSize = sizeof(OPENFILENAME);
-        ofn.hwndOwner = NULL;
-        ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-        if (GetOpenFileName(&ofn))
-        {
-
-        }
-    }
-
-    if (nCmdID == cmdButton15 && verb == UI_EXECUTIONVERB_EXECUTE)
-    {
-        OPENFILENAME ofn;
-        TCHAR szFile[MAX_PATH];
-        ZeroMemory(&ofn, sizeof(OPENFILENAME));
-        ofn.lStructSize = sizeof(OPENFILENAME);
-        ofn.hwndOwner = NULL;
-        ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-        if (GetOpenFileName(&ofn))
-        {
-
-        }
-    }
-
-    if (nCmdID == cmdButton16 && verb == UI_EXECUTIONVERB_EXECUTE)
-    {
-        OPENFILENAME ofn;
-        TCHAR szFile[MAX_PATH];
-        ZeroMemory(&ofn, sizeof(OPENFILENAME));
-        ofn.lStructSize = sizeof(OPENFILENAME);
-        ofn.hwndOwner = NULL;
-        ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text\0*.TXT\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-        if (GetOpenFileName(&ofn))
-        {
-
-        }
-    }
 
     return S_OK;
 }

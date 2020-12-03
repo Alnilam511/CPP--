@@ -63,6 +63,7 @@ using namespace std;
          max = Maximum(fabs(max), fabs(min));
          if (hWnd == hStatic4)                            //hstatic4 aptt
          {
+             delete[]aptt;
              aptt = new POINT[n];
              while (k < n)
              {
@@ -74,8 +75,9 @@ using namespace std;
          }
          if (hWnd == hStatic5)                          //hstatic5 apt
          {
+             delete apt;
              apt = new POINT[n];
-             while (k <= n)
+             while (k < n)
              {
                  apt[k].x = k * rect.right / (n - 1);
                  apt[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom / 2;
@@ -147,6 +149,8 @@ STDMETHODIMP CCommandHandler::Execute(
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
         }
 
     }
@@ -191,6 +195,7 @@ STDMETHODIMP CCommandHandler::Execute(
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }
 
     }
@@ -234,6 +239,7 @@ STDMETHODIMP CCommandHandler::Execute(
             ShowWindow(hStatic7, SW_HIDE);
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
+            SetWindowText(hStatic8, NULL);
         }
 
     }

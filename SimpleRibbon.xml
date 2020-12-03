@@ -142,7 +142,7 @@
 	</Command>
 	<Command Name="cmdButton14">
    	  <Command.LabelTitle>
-  	    <String Id ="340">希尔伯特黄变换</String>
+  	    <String Id ="340">希尔伯特变换</String>
 	  </Command.LabelTitle>
 	  <Command.LargeImages>
 		<Image Id="341">res/PrintRelationshipsL.bmp</Image>
