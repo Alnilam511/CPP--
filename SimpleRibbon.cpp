@@ -224,6 +224,7 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 
     double* part = GetPart(input, l, k);
     LPCTSTR str;
+    memset(szBuffer1, '\0', sizeof(szBuffer1));
     switch (BtnNum)
     {
     case cmdButton3: 

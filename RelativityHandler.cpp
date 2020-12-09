@@ -64,6 +64,7 @@ STDMETHODIMP CRelativityHandler::Execute(
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
         }
 
     }
@@ -165,6 +166,7 @@ STDMETHODIMP CRelativityHandler::Execute(
                 }                
                 SetWindowText(hStatic2, szBuffer);
                 SetWindowText(hStatic8, NULL);
+                InvalidateRect(hStatic6, NULL, true);
             }
             else
             {

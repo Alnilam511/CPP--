@@ -188,6 +188,7 @@ STDMETHODIMP CCommandHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n 均值:\n   %e\n 方差:\n   %e\n";
             swprintf_s(szBuffer, str, n, average, variance);
+
             DrawLine(hStatic4, num, n);
             ShowWindow(hStatic5, SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
@@ -196,6 +197,7 @@ STDMETHODIMP CCommandHandler::Execute(
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
         }
 
     }
@@ -232,6 +234,7 @@ STDMETHODIMP CCommandHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n 峭度:\n   %e\n";
             swprintf_s(szBuffer, str, n, kurtosis);
+
             DrawLine(hStatic4, num, n);
             gnum = num;
             gn = n;
@@ -240,6 +243,7 @@ STDMETHODIMP CCommandHandler::Execute(
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
         }
 
     }
