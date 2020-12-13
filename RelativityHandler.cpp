@@ -167,6 +167,7 @@ STDMETHODIMP CRelativityHandler::Execute(
                 SetWindowText(hStatic2, szBuffer);
                 SetWindowText(hStatic8, NULL);
                 InvalidateRect(hStatic6, NULL, true);
+                InvalidateRect(hStatic7, NULL, true);
             }
             else
             {

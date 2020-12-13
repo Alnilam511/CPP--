@@ -23,6 +23,7 @@ using namespace std;
  int gn1;
  POINT* apt;
  POINT* aptt;
+ POINT* apts;
 
 
  void DrawLine(HWND hWnd, double* num, int n)                          //固定波形绘制，num波形数组，n数组长度
@@ -48,6 +49,16 @@ using namespace std;
          LineTo(hdc, j, rect.bottom);
          j = j + rect.right / 5;
      }
+     DeleteObject(hpen);
+     rect.right = rect.right - 1;
+     rect.bottom = rect.bottom - 1;
+     hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+     SelectObject(hdc, hpen);
+     MoveToEx(hdc, 0, 0, NULL);
+     LineTo(hdc, rect.right, 0);
+     LineTo(hdc, rect.right, rect.bottom);
+     LineTo(hdc, 0, rect.bottom);
+     LineTo(hdc, 0, 0);
      DeleteObject(hpen);
      if (num != NULL)
      {
@@ -86,9 +97,22 @@ using namespace std;
              Polyline(hdc, apt, n);
 
          }
+         if (hWnd == hStatic7)
+         {
+             delete apts;
+             apts = new POINT[n];
+             while (k < n)
+             {
+                 apts[k].x = k * rect.right / (n - 1);
+                 apts[k].y = (long)((-num[k]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                 k++;
+             }
+             Polyline(hdc, apts, n);
+
+         }
          DeleteObject(hpen);
      }
-
+     return;
  }
 
 STDMETHODIMP CCommandHandler::Execute(

@@ -7,13 +7,21 @@
 
 #include "GlobalVariable.h"
 #include "Functions.h"
+#include <fft.h>            //调用SP++信号库- 傅里叶变换函数
+#include <wft.h>            //加窗函数->短时傅里叶
+#include <cwt.h>            //小波变换
+#include "WaveletPack.h"    //小波包变换
+#include "EMD.h"            //经验模态分解
+#include <iomanip>
 
 //#include "CommandHandler.h"
 #include "SimpleRibbonUI.h"
 #include <stack.h>
 #define MAX_LOADSTRING 100
 
-int BtnNum;
+using namespace splab;
+
+int BtnNum = 0;
 POINT* apt1;
 TCHAR szBuffer0[MAX_PATH];
 TCHAR szBuffer[MAX_PATH];
@@ -21,9 +29,9 @@ TCHAR szBuffer1[MAX_PATH];
 HWND hStatic8;
 HWND hStatic2;
 
-HINSTANCE hInst;                                
-WCHAR wszTitle[MAX_LOADSTRING];                 
-WCHAR wszWindowClass[MAX_LOADSTRING];          
+HINSTANCE hInst;
+WCHAR wszTitle[MAX_LOADSTRING];
+WCHAR wszWindowClass[MAX_LOADSTRING];
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -39,15 +47,12 @@ int ismove = 0;                                   // 点击位置判断，0窗口外，1在h
 int CanvasStatus = 0;                  //画布状态判断 |  1  |  2  |  3  |  4  |  5  |  6  |    上为int数字，下为对应状态
                                        //             |  4  |  4' | 4,5 | 4',5| 4,5'|4',5'|    4：窗口4，5：窗口5，带 ' ：局部放大状态
 int m;
-HANDLE hOut;
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPSTR     lpCmdLine,
                      int       nCmdShow)
 {
-    AllocConsole();
-    hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -164,15 +169,132 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 {
+    double* input = NULL;
+    double* output = NULL;
+    delete[]input;
+    delete[]output;
+    int n2=0;
+
+    typedef double Type;
+    Vector < complex<Type> > Xk, Yk;
+    Vector <Type> xn, yn;
     int k, l;
-    HDC hdc = GetDC(hWnd);
-    GetClientRect(hWnd, &rect);
     k = l = 0;
     long i, j;
-    int n=0;
-    if (ptty.x > 900)
+    int n = 0;
+
+    HDC hdc = GetDC(hWnd);
+    HDC hDCMem;                                             //双重缓冲
+    HBITMAP hBmpMem;
+    hDCMem = CreateCompatibleDC(hdc);
+    hBmpMem = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+    SelectObject(hDCMem, hBmpMem);
+
+    if (hWnd == hStatic4)                                                        //////////////Drawline1开始//////////////////
     {
-        ptty.x = 900;
+        input = gnum;
+        n2 = gn;
+    }
+    if (hWnd == hStatic5)
+    {
+        input = gnum1;
+        n2 = gn1;
+    }
+
+
+    GetClientRect(hWnd, &rect);
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
+    SetBkColor(hDCMem, RGB(255, 255, 255));
+    FillRect(hDCMem, &rect, hBrush);
+    DeleteObject(hBrush);
+
+    hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
+    SelectObject(hDCMem, hpen);
+    int i1 = rect.bottom / 5;  int j1 = rect.right / 5;
+    while (i1 < rect.bottom)
+    {
+        MoveToEx(hDCMem, 0, i1, NULL);
+        LineTo(hDCMem, rect.right, i1);
+        i1 = i1 + rect.bottom / 5;
+    }
+    while (j1 < rect.right)
+    {
+        MoveToEx(hDCMem, j1, 0, NULL);
+        LineTo(hDCMem, j1, rect.bottom);
+        j1 = j1 + rect.right / 5;
+    }
+    DeleteObject(hpen);
+    rect.right = rect.right - 1;
+    rect.bottom = rect.bottom - 1;
+    hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    SelectObject(hDCMem, hpen);
+    MoveToEx(hDCMem, 0, 0, NULL);
+    LineTo(hDCMem, rect.right, 0);
+    LineTo(hDCMem, rect.right, rect.bottom);
+    LineTo(hDCMem, 0, rect.bottom);
+    LineTo(hDCMem, 0, 0);
+    DeleteObject(hpen);
+
+    if (input != NULL)
+    {
+        hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));             //DodgerBlue
+        SelectObject(hDCMem, hpen);
+        int k1 = 0;
+        double min = input[0], max = input[0];
+        for (int l1 = 1; l1 < n2; l1++)
+        {
+            max = Maximum(max, input[l1]);
+            min = Minimum(min, input[l1]);
+        }
+        max = Maximum(fabs(max), fabs(min));
+        if (hWnd == hStatic4)                            //hstatic4 aptt
+        {
+            delete[]aptt;
+            aptt = new POINT[n2];
+            while (k1 < n2)
+            {
+                aptt[k1].x = k1 * rect.right / (n2 - 1);
+                aptt[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                k1++;
+            }
+            Polyline(hDCMem, aptt, n2);
+        }
+        if (hWnd == hStatic5)                          //hstatic5 apt
+        {
+            delete apt;
+            apt = new POINT[n2];
+            while (k1 < n2)
+            {
+                apt[k1].x = k1 * rect.right / (n2 - 1);
+                apt[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                k1++;
+            }
+            Polyline(hDCMem, apt, n2);
+
+        }
+        if (hWnd == hStatic7)
+        {
+            delete apts;
+            apts = new POINT[n2];
+            while (k1 < n2)
+            {
+                apts[k1].x = k1 * rect.right / (n2 - 1);
+                apts[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                k1++;
+            }
+            Polyline(hDCMem, apts, n2);
+
+        }
+        DeleteObject(hpen);
+
+    }                                                                              ///////////////Drawline1结束//////////////////
+
+
+    GetClientRect(hWnd, &rect);
+    rect.bottom = rect.bottom - 1;
+    if (ptty.x >= 900)
+    {
+        ptty.x = 899;
     }
     if (ptty.x < 0)
     {
@@ -191,11 +313,10 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
     rect.left = i;
     rect.right = j;
     HBRUSH hbrush = CreateSolidBrush(RGB(255, 255, 255));
-    FillRect(hdc, &rect, hbrush);
+    FillRect(hDCMem, &rect, hbrush);
     DeleteObject(hbrush);
     POINT* apt0;
     apt0 = new POINT;
-    double* input=NULL;
     if (ismove == 1)
     {
         apt0 = aptt;
@@ -205,9 +326,8 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
     {
        if (ismove == 2)
        {
-         apt0 = apt;        
+         apt0 = apt;
          input = gnum1;
-
        }
     }
    
@@ -221,10 +341,15 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         l++;
     }
     m = l - k;
+    if (m == 0)
+    {
+        return;
+    }
 
     double* part = GetPart(input, l, k);
     LPCTSTR str;
     memset(szBuffer1, '\0', sizeof(szBuffer1));
+                                                              /////////////////////局部计算/////////////////////////
     switch (BtnNum)
     {
     case cmdButton3: 
@@ -254,11 +379,208 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         swprintf_s(szBuffer1, str, m + 1, kurtosis);
         break;
     }
+    case cmdButton8:
+    {
+        int bb = 0;
+        for (int aa = k; aa <= l; aa++)
+        {
+            xn.resize(m + 1);
+            xn[bb] = input[aa];
+            bb++;
+        }
+        Xk = fftr2c(xn);
+        output = new double[m + 1];
+        for (int cc = 0; cc < m + 1; ++cc)
+        {
+            output[cc] = abs(Xk[cc]) * abs(Xk[cc]);
+        }
+        str = L" k:\n   %i\n l:\n   %i\n";
+        DrawLine(hStatic7, output, m + 1);
+        swprintf_s(szBuffer1, str, k, l);
+        break;
     }
+    case cmdButton9:
+    {
+        //互谱
+        break;
+    }
+    case cmdButton10:
+    {
+        int bb = 0;
+        for (int aa = k; aa <= l; aa++)
+        {
+            xn.resize(m + 1);
+            xn[bb] = input[aa];
+            bb++;
+        }
+        Xk = fftr2c(xn);
+        output = new double[m + 1];
+        for (int cc = 0; cc < m + 1; ++cc)
+        {
+            output[cc] = abs(Xk[cc]);
+            Yk.resize(m + 1);
+            Yk[cc] = complex<Type>(log(output[cc]), 0);
+        }
+        yn = ifftc2r(Yk);
+        DrawLine(hStatic7, yn, m + 1);
+        break;
+    }
+    case cmdButton11:
+    {
+        //短时傅里叶
+        break;
+    }
+    case cmdButton12:
+    {
+        //小波
+        break;
+    }
+    case cmdButton13:
+    {
+        //小波包分析
+        int dbN = 1, stages = 3, numf = 1, bb;
+        float thrshold = 0.5;
+        n = m + 1;
+        FILE* fp, * fp1;
 
+        ofstream OutFile("WaveletPack-Part.txt");
+        for (int aa = k; aa <= l; aa++)
+        {
+            OutFile << input[aa] << endl;
+        }
+        OutFile.close();
+
+        //p = szFile + ofn.nFileOffset;
+        //char nchar[256] = { 0 };
+        //WideCharToMultiByte(CP_ACP, 0, p, -1, nchar, 256, NULL, NULL);
+        const char* constc = nullptr;
+        constc = { "WaveletPack-Part.txt" };
+
+        if ((fp = fopen(constc, "r")) == NULL)
+        {
+            printf("cann't open input file\n");
+            exit(-3);
+        }
+        for (bb = 0; bb < n; bb++)
+            fscanf_s(fp, "%f", &dataio[bb]);
+
+        // wavelet transformation
+        dwpt_filter(dbN, stages, numf, thrshold);
+
+        // out put result
+        if ((fp1 = fopen("WaveletPackOutput-Part.txt", "w+")) == NULL)
+        {
+            printf("cann't open output file\n");
+            exit(-4);
+        }
+        for (bb = 0; bb < n; bb++)
+            fprintf(fp1, "%10.4f\n", dataio[bb]);
+        double *snum = NULL;
+        delete[]snum;
+        snum = new double[n];
+        for (i = 0; i < n; i++)
+        {
+            snum[i] = dataio[i];
+        }
+        DrawLine(hStatic7, snum, n);
+        fclose(fp);
+        fclose(fp1);
+        break;
+    }
+    case cmdButton14:
+    {
+        //希尔伯特变换
+        double* hnum = NULL;
+        delete[]hnum;
+        hnum = new double[m+1];
+        int bb = 0;
+        for (int aa = k; aa <= l; aa++)
+        {
+            xn.resize(m + 1);
+            xn[bb] = input[aa];
+            hnum[bb] = 0;
+            bb++;
+        }
+        Xk = fftr2c(xn);
+        n = m + 1;
+        if ((n > 0) && ((2 * floor(n / 2)) == (n))) // n is even
+        {
+            hnum[0] = 1;
+            hnum[n / 2] = 1;
+
+            for (int cc = 1; cc < n / 2; cc++)
+            {
+                hnum[cc] = 2;
+            }
+        }
+        else //n is odd
+        {
+            if (n > 0)
+            {
+                hnum[0] = 1;
+                for (int cc = 1; cc < (n + 1) / 2; cc++)
+                {
+                    hnum[cc] = 2;
+                }
+            }
+        }
+        for (int cc = 0; cc < n; cc++)
+        {
+            double xr = real(Xk[cc]);
+            double xi = imag(Xk[cc]);
+            xr = xr * hnum[cc];
+            xi = xi * hnum[cc];
+            Xk.resize(n);
+            Xk[cc] = complex<Type>(xr, xi);
+        }
+        Yk = ifftc2c(Xk);
+        output = new double[n];
+        for (int cc = 0; cc < n; cc++)
+        {
+            output[cc] = imag(Yk[cc]);
+        }
+        DrawLine(hStatic7, output, n);
+        break;
+    }
+    case cmdButton15:
+    {
+        //经验模态
+        n = m + 1;
+        double* s = NULL;
+        double* t = NULL;
+        delete[]s;
+        delete[]t;
+        s = new double[n];
+        t = new double[n];
+
+        int bb = 0;
+        for (int aa = k; aa <= l; aa++)
+        {
+            s[bb] = input[aa];
+            bb++;
+        }
+        for (int cc = 0; cc < n; cc++)
+        {
+            t[cc] = 1.0 * cc / n;
+        }
+        double yp1 = s[0] / t[0];
+        double ypn = s[n] / t[n];
+        double* y2 = spline1(t, s, n, yp1, ypn);
+        output = new double[n];
+        for (int cc = 0; cc < n; cc++)
+        {
+            double x = t[cc];
+            double y = spline2(t, s, y2, n, x);
+            output[cc] = y;
+        }
+        DrawLine(hStatic7, output, n);
+        break;
+    }
+    }                                         
+                                                              /////////////////////////////////////////////////////
     delete[]apt1;
     apt1 = new POINT[m];
-
+    n = 0;
     while (n<m)
     {
         apt1[n] = apt0[k];
@@ -266,14 +588,27 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         k++;
     }
     hpen = CreatePen(PS_SOLID, 1, RGB(255,127,0));                 //DarkOrange1
-    SelectObject(hdc, hpen);
-    Polyline(hdc, apt1, m);
+    SelectObject(hDCMem, hpen);
+    Polyline(hDCMem, apt1, m);
     DeleteObject(hpen);
+    hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    SelectObject(hDCMem, hpen);
+    MoveToEx(hDCMem, 0, 0, NULL);
+    LineTo(hDCMem, rect.right, 0);
+    MoveToEx(hDCMem, rect.right, rect.bottom,NULL);
+    LineTo(hDCMem, 0, rect.bottom);
+    DeleteObject(hpen);
+    GetClientRect(hWnd, &rect);
+    BitBlt(hdc, 0, 0, rect.right, rect.bottom, hDCMem, 0, 0, SRCCOPY);
+    DeleteDC(hDCMem);
+    DeleteObject(hBmpMem);
+    return;
 }
 
 
 
-void Drawlinemk3(HWND hWnd){
+void Drawlinemk3(HWND hWnd)
+{
     if (hWnd == hStatic4)
     {
         hWnd = hStatic6;
@@ -306,6 +641,16 @@ void Drawlinemk3(HWND hWnd){
         j = j + rect.right / 5;
     }
     DeleteObject(hpen);
+    rect.right = rect.right - 1;
+    rect.bottom = rect.bottom - 1;
+    hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    SelectObject(hdc, hpen);
+    MoveToEx(hdc, 0, 0, NULL);
+    LineTo(hdc, rect.right, 0);
+    LineTo(hdc, rect.right, rect.bottom);
+    LineTo(hdc, 0, rect.bottom);
+    LineTo(hdc, 0, 0);
+    DeleteObject(hpen);
     hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));                      //DodgerBlue
     SelectObject(hdc, hpen);
     apt2 = new POINT[m];
@@ -318,6 +663,7 @@ void Drawlinemk3(HWND hWnd){
     Polyline(hdc, apt2, m);
     DeleteObject(hpen);
     delete[]apt2;
+    return;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -392,7 +738,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
-        WriteConsole(hOut, L"111 \n", 6, NULL, NULL);
         if (ismove == 0)
         {
             switch (CanvasStatus)
@@ -404,7 +749,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             case 2:
             {
-                DrawLine(hStatic4, gnum, gn);
                 ismove = 1;
                 Drawlinemk2(hStatic4, pt, ptt);
                 Drawlinemk3(hStatic4);
@@ -419,7 +763,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             case 4:
             {
-                DrawLine(hStatic4, gnum, gn);
                 ismove = 1;
                 Drawlinemk2(hStatic4, pt, ptt);
                 Drawlinemk3(hStatic4);
@@ -430,7 +773,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case 5:
             {
                 DrawLine(hStatic4, gnum, gn);
-                DrawLine(hStatic5, gnum1, gn1);
                 ismove = 2;
                 Drawlinemk2(hStatic5, pt1, ptt1);
                 Drawlinemk3(hStatic5);
@@ -439,11 +781,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             case 6:
             {
-                DrawLine(hStatic4, gnum, gn);
                 ismove = 1;
                 Drawlinemk2(hStatic4, pt, ptt);
                 Drawlinemk3(hStatic4);
-                DrawLine(hStatic5, gnum1, gn1);
                 ismove = 2;
                 Drawlinemk2(hStatic5, pt1, ptt1);
                 Drawlinemk3(hStatic5);
@@ -459,18 +799,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONDOWN: 
     {
+        switch (BtnNum)
+        {
+        case 0 :
+            return 0;
+        case cmdButton3:
+        case cmdButton4:
+        case cmdButton5:
+        case cmdButton6:
+        case cmdButton7:
+        {
         pt0 = pt;
         GetCursorPos(&pt);
         GetWindowRect(hStatic4, &rect);
         if (PtInRect(&rect, pt))
-        {
+            {
             ScreenToClient(hStatic4, &pt);
             ismove = 1;
-        }
+            }
         else
-        {
+            {
             GetWindowRect(hStatic5, &rect);
-            if (PtInRect(&rect, pt)&&IsWindowVisible(hStatic5))
+            if (PtInRect(&rect, pt) && IsWindowVisible(hStatic5))
             {
                 pt1 = pt;
                 pt = pt0;
@@ -483,8 +833,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 pt = pt0;
             }
 
+            }
+        return 0; 
         }
-        return 0;
+        case cmdButton8:
+        case cmdButton9:
+        case cmdButton10:
+        case cmdButton11:
+        case cmdButton12:
+        case cmdButton13:
+        case cmdButton14:
+        case cmdButton15:
+        {
+            pt0 = pt;
+            GetCursorPos(&pt);
+            GetWindowRect(hStatic4, &rect);
+            if (PtInRect(&rect, pt))
+            {
+                ScreenToClient(hStatic4, &pt);
+                ismove = 1;
+            }
+            else
+            {          
+                ismove = 0;
+                pt = pt0;
+            }
+            return 0;
+        }
+        default:
+            break;
+        }
+        
     }
 
     case WM_LBUTTONUP:
@@ -492,6 +871,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (ismove == 1)
         {
             Drawlinemk3(hStatic4);
+            //if (isSpectrum == true)
+            //{
+
+            //}
             switch (CanvasStatus)
             {
                 case 1:
@@ -539,7 +922,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             GetCursorPos(&ptt);
             ScreenToClient(hStatic4, &ptt);
-            DrawLine(hStatic4, gnum, gn);
+            //DrawLine(hStatic4, gnum, gn);
             Drawlinemk2(hStatic4, pt, ptt);
             SetWindowText(hStatic8, szBuffer1);
         }
@@ -547,7 +930,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             GetCursorPos(&ptt1);
             ScreenToClient(hStatic5, &ptt1);
-            DrawLine(hStatic5, gnum1, gn1);
+            //DrawLine(hStatic5, gnum1, gn1);
             Drawlinemk2(hStatic5, pt1, ptt1);
             SetWindowText(hStatic8, szBuffer1);
         }

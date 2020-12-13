@@ -17,4 +17,5 @@ extern int gn;
 extern int gn1;
 extern POINT* aptt;
 extern POINT* apt;
+extern POINT* apts;
 extern int CanvasStatus;

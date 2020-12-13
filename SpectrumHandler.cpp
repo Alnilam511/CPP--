@@ -41,7 +41,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
     if (nCmdID == cmdButton8 && verb == UI_EXECUTIONVERB_EXECUTE)
     {    
         BtnNum = nCmdID;
-        OPENFILENAME ofn;			
+        OPENFILENAME ofn;
         TCHAR szFile[MAX_PATH];
         ZeroMemory(&ofn, sizeof(OPENFILENAME));
         ofn.lStructSize = sizeof(OPENFILENAME);
@@ -70,6 +70,15 @@ STDMETHODIMP CSpectrumHandler::Execute(
             fin.open(szFile);
             double* num = GetNum(fin, n);
                         
+            ShowWindow(hStatic5, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            DrawLine(hStatic4, num, n);
+            gn = n;
+            gnum = new double[gn];
+            for (int i = 0; i < gn; i++)
+            {
+                gnum[i] = num[i];
+            }
             for (int i = 0; i < n; i++)
             {
                 xn.resize(n);
@@ -89,8 +98,19 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             LPCTSTR str = L" 数据个数:\n   %i\n";
             swprintf_s(szBuffer, str, n);
+
+            DrawLine(hStatic5, num, n);
+            gn1 = n;
+            gnum1 = new double[gn1];
+            CanvasStatus = 3;
+            for (int i = 0; i < gn1; i++)
+            {
+                gnum1[i] = num[i];
+            }
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
+            InvalidateRect(hStatic7, NULL, true);
         }          
     }
 
@@ -231,6 +251,16 @@ STDMETHODIMP CSpectrumHandler::Execute(
             fin.open(szFile);
             double* num = GetNum(fin, n);
 
+
+            ShowWindow(hStatic5, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            DrawLine(hStatic4, num, n);
+            gn = n;
+            gnum = new double[gn];
+            for (int i = 0; i < gn; i++)
+            {
+                gnum[i] = num[i];
+            }
             ofstream OutFile("CEP.txt");
             for (int i = 0; i < n; i++)
             {
@@ -242,7 +272,7 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             for (int i = 0; i < n; ++i)
             {
-                num[i] = abs(Xk[i]) * abs(Xk[i]);
+                num[i] = abs(Xk[i]);
                 Yk.resize(n);
                 Yk[i] = complex<Type>(log(num[i]), 0);
             }
@@ -257,8 +287,19 @@ STDMETHODIMP CSpectrumHandler::Execute(
             OutFile.close();
             LPCTSTR str = L" 数据个数:\n   %i\n";
             swprintf_s(szBuffer, str, n);
+
+            DrawLine(hStatic5, yn, n);
+            gn1 = n;
+            gnum1 = new double[gn1];
+            CanvasStatus = 3;
+            for (int i = 0; i < gn1; i++)
+            {
+                gnum1[i] = yn[i];
+            }
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
+            InvalidateRect(hStatic7, NULL, true);
         }
     }
 
@@ -290,7 +331,8 @@ STDMETHODIMP CSpectrumHandler::Execute(
             Type c = 0;
             Type b = Ls - 1.0;
             Vector<Type> t = linspace(c, b, Ls) / Type(Fs);
-            Vector<Type> s = sin(Type(400 * PI) * pow(t, Type(2.0)));
+            //Vector<Type> s = sin(Type(400 * PI) * pow(t, Type(2.0)));
+            Vector<Type> s = 1;
 
             c = 0;
             b = Type(Lg - 1.0);
@@ -393,6 +435,16 @@ STDMETHODIMP CSpectrumHandler::Execute(
             for (j = 0; j < datalen; j++)
                 fscanf_s(fp, "%f", &dataio[j]);
 
+            ShowWindow(hStatic5, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            gn = j;                                                         
+            gnum = new double[gn];
+            for (int i = 0; i < gn; i++)
+            {
+                gnum[i] = dataio[i];
+            }
+            DrawLine(hStatic4, gnum, gn);
+
             // wavelet transformation
             dwpt_filter(dbN, stages, numf, thrshold);
 
@@ -410,8 +462,20 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             LPCTSTR str = L"小波包分析已完成，数据文件已输出";
             swprintf_s(szBuffer, str);
+
+            gn1 = j;
+            gnum1 = new double[gn1];
+            for (int i = 0; i < gn1; i++)
+            {
+                gnum1[i] = dataio[i];
+            }
+            DrawLine(hStatic5, gnum1, gn1);
+
+            CanvasStatus = 3;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
+            InvalidateRect(hStatic7, NULL, true);
         }
     }
 
@@ -447,6 +511,17 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             fin.open(szFile);
             double* s = GetNum(fin, n);
+
+            ShowWindow(hStatic5, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            DrawLine(hStatic4, s, n);
+            gn = n;                                                          //双窗口gnum，gnum1赋值
+            gnum = new double[gn];
+            for (i = 0; i < gn; i++)
+            {
+                gnum[i] = s[i];
+            }
+
             for (i = 0; i < n; i++)
             {
                 xn.resize(n);
@@ -501,10 +576,23 @@ STDMETHODIMP CSpectrumHandler::Execute(
             }
             OutFile.close();
 
+            gn1 = n;
+            gnum1 = new double[gn1];
+            CanvasStatus = 3;
+            for (i = 0; i < gn1; i++)
+            {
+                gnum1[i] = imag(Yk[i]);
+            }
+            DrawLine(hStatic5, gnum1, n);
+
+
             LPCTSTR str = L"希尔伯特变换已完成，数据文件已输出";
             swprintf_s(szBuffer, str);
+
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
+            InvalidateRect(hStatic7, NULL, true);
         }
     }
 
@@ -535,6 +623,17 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             fin.open(szFile);
             double* s = GetNum(fin, n);
+
+            ShowWindow(hStatic5, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            DrawLine(hStatic4, s, n);
+            gn = n;                                                          //双窗口gnum，gnum1赋值
+            gnum = new double[gn];
+            for (int i = 0; i < gn; i++)
+            {
+                gnum[i] = s[i];
+            }
+
             double t[10240] = { 0 };
             double yp1, ypn;   //一阶导数值
 
@@ -561,8 +660,19 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             LPCTSTR str = L"经验模态已完成，数据文件已输出";
             swprintf_s(szBuffer, str);
+
+            gn1 = n;
+            gnum1 = new double[gn1];
+            CanvasStatus = 3;
+            for (int i = 0; i < gn1; i++)
+            {
+                gnum1[i] = yn[i];
+            }
+            DrawLine(hStatic5, gnum1, n);
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
+            InvalidateRect(hStatic6, NULL, true);
+            InvalidateRect(hStatic7, NULL, true);
         }
     }
 
