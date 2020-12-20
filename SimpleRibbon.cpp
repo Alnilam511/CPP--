@@ -28,6 +28,8 @@ TCHAR szBuffer[MAX_PATH];
 TCHAR szBuffer1[MAX_PATH];
 HWND hStatic8;
 HWND hStatic2;
+HWND hComboBox;
+HFONT hFont;
 
 HINSTANCE hInst;
 WCHAR wszTitle[MAX_LOADSTRING];
@@ -42,11 +44,17 @@ POINT ptt;
 POINT pt1;
 POINT ptt1;
 POINT pt0;
+double* onum = NULL;                               //old num
+double* onum1 = NULL;
+double* pnum1 = NULL;
+double* pnum2 = NULL;
 int ismove = 0;                                   // 点击位置判断，0窗口外，1在hstatic4，2在hstatic5
 
 int CanvasStatus = 0;                  //画布状态判断 |  1  |  2  |  3  |  4  |  5  |  6  |    上为int数字，下为对应状态
                                        //             |  4  |  4' | 4,5 | 4',5| 4,5'|4',5'|    4：窗口4，5：窗口5，带 ' ：局部放大状态
-int m;
+int m;                                 //   截取数据长度
+
+int l1, l2, k1, k2, m1, m2;
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -139,7 +147,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     hInst = hInstance; // Store instance handle in our global variable.
 
-    hWnd = CreateWindow(wszWindowClass, L"TEST No.1", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+    hWnd = CreateWindow(wszWindowClass, L"TEST No.1", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_MAXIMIZE,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
     if (!hWnd)
@@ -166,6 +174,48 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 #define btn1 1
 #define btn2 2
+
+void DrawCoordinate(HWND hWnd, HFONT hfont, double* num, int n,int nn,int len)
+{
+    AxisText laxis[5];
+    AxisText raxis[5];
+    HDC hdc = GetDC(hWnd);
+    SelectObject(hdc, hfont);
+    GetClientRect(hWnd, &rect);
+    rect.right = rect.right - 1;
+    SetTextAlign(hdc, TA_RIGHT);
+    double min = num[0], max = num[0];
+    for (int l = 1; l < len; l++)
+    {
+        max = Maximum(max, num[l]);
+        min = Minimum(min, num[l]);
+    }
+    max = Maximum(fabs(max), fabs(min));
+    max = (long)max + 1;
+
+    for (int i = 0; i < 5; i++)
+    {
+        laxis[i].x = -5;
+        laxis[i].y = (rect.bottom * i / 4) - 10;
+        laxis[i].num = (int)(max - max * i / 2);
+        wchar_t str[10];
+        wsprintf(str, L"%d", laxis[i].num);
+        TextOut(hdc, laxis[i].x, laxis[i].y, str, lstrlen(str));
+    }
+    SetTextAlign(hdc, TA_CENTER);
+    for (int i = 0; i < 5; i++)
+    {
+        raxis[i].x = (rect.right * i / 4);
+        raxis[i].y = rect.bottom + 5;
+        raxis[i].num = n + (int)((nn-n) * i / 4);
+        wchar_t str[10];
+        wsprintf(str, L"%d", raxis[i].num);
+        TextOut(hdc, raxis[i].x, raxis[i].y, str, lstrlen(str));
+    }
+
+    return;
+}
+
 
 void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 {
@@ -210,18 +260,18 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 
     hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
     SelectObject(hDCMem, hpen);
-    int i1 = rect.bottom / 5;  int j1 = rect.right / 5;
+    int i1 = rect.bottom / 4;  int j1 = rect.right / 4;
     while (i1 < rect.bottom)
     {
         MoveToEx(hDCMem, 0, i1, NULL);
         LineTo(hDCMem, rect.right, i1);
-        i1 = i1 + rect.bottom / 5;
+        i1 = i1 + rect.bottom / 4;
     }
     while (j1 < rect.right)
     {
         MoveToEx(hDCMem, j1, 0, NULL);
         LineTo(hDCMem, j1, rect.bottom);
-        j1 = j1 + rect.right / 5;
+        j1 = j1 + rect.right / 4;
     }
     DeleteObject(hpen);
     rect.right = rect.right - 1;
@@ -239,48 +289,49 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
     {
         hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));             //DodgerBlue
         SelectObject(hDCMem, hpen);
-        int k1 = 0;
+        int kk = 0;
         double min = input[0], max = input[0];
-        for (int l1 = 1; l1 < n2; l1++)
+        for (int ll = 1; ll < n2; ll++)
         {
-            max = Maximum(max, input[l1]);
-            min = Minimum(min, input[l1]);
+            max = Maximum(max, input[ll]);
+            min = Minimum(min, input[ll]);
         }
         max = Maximum(fabs(max), fabs(min));
+        max = (long)max + 1;
         if (hWnd == hStatic4)                            //hstatic4 aptt
         {
             delete[]aptt;
             aptt = new POINT[n2];
-            while (k1 < n2)
+            while (kk < n2)
             {
-                aptt[k1].x = k1 * rect.right / (n2 - 1);
-                aptt[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
-                k1++;
+                aptt[kk].x = kk * rect.right / (n2 - 1);
+                aptt[kk].y = (long)((-input[kk]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                kk++;
             }
             Polyline(hDCMem, aptt, n2);
         }
-        if (hWnd == hStatic5)                          //hstatic5 apt
+        else if (hWnd == hStatic5)                          //hstatic5 apt
         {
             delete apt;
             apt = new POINT[n2];
-            while (k1 < n2)
+            while (kk < n2)
             {
-                apt[k1].x = k1 * rect.right / (n2 - 1);
-                apt[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
-                k1++;
+                apt[kk].x = kk * rect.right / (n2 - 1);
+                apt[kk].y = (long)((-input[kk]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                kk++;
             }
             Polyline(hDCMem, apt, n2);
 
         }
-        if (hWnd == hStatic7)
+        else 
         {
             delete apts;
             apts = new POINT[n2];
-            while (k1 < n2)
+            while (kk < n2)
             {
-                apts[k1].x = k1 * rect.right / (n2 - 1);
-                apts[k1].y = (long)((-input[k1]) * rect.bottom / (max * 2)) + rect.bottom / 2;
-                k1++;
+                apts[kk].x = kk * rect.right / (n2 - 1);
+                apts[kk].y = (long)((-input[kk]) * rect.bottom / (max * 2)) + rect.bottom / 2;
+                kk++;
             }
             Polyline(hDCMem, apts, n2);
 
@@ -312,19 +363,16 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
     j= max(ptx.x, ptty.x);
     rect.left = i;
     rect.right = j;
-    HBRUSH hbrush = CreateSolidBrush(RGB(255, 255, 255));
-    FillRect(hDCMem, &rect, hbrush);
-    DeleteObject(hbrush);
     POINT* apt0;
     apt0 = new POINT;
-    if (ismove == 1)
+    if (hWnd == hStatic4)
     {
         apt0 = aptt;
         input = gnum;
     }
     else
     {
-       if (ismove == 2)
+       if (hWnd == hStatic5)
        {
          apt0 = apt;
          input = gnum1;
@@ -347,6 +395,20 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
     }
 
     double* part = GetPart(input, l, k);
+
+    if (hWnd == hStatic4)
+    {
+        l1 = l;
+        k1 = k;
+        m1 = m;
+    }
+    if (hWnd == hStatic5)
+    {
+        l2 = l;
+        k2 = k;
+        m2 = m;
+    }
+
     LPCTSTR str;
     memset(szBuffer1, '\0', sizeof(szBuffer1));
                                                               /////////////////////局部计算/////////////////////////
@@ -394,9 +456,8 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         {
             output[cc] = abs(Xk[cc]) * abs(Xk[cc]);
         }
-        str = L" k:\n   %i\n l:\n   %i\n";
         DrawLine(hStatic7, output, m + 1);
-        swprintf_s(szBuffer1, str, k, l);
+        DrawCoordinate(hStatic7, hFont, output, 0, m + 1, m + 1);
         break;
     }
     case cmdButton9:
@@ -423,6 +484,7 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
         }
         yn = ifftc2r(Yk);
         DrawLine(hStatic7, yn, m + 1);
+        DrawCoordinate(hStatic7, hFont, yn, 0, m + 1, m + 1);
         break;
     }
     case cmdButton11:
@@ -483,6 +545,7 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
             snum[i] = dataio[i];
         }
         DrawLine(hStatic7, snum, n);
+        DrawCoordinate(hStatic7, hFont, snum, 0, n, n);
         fclose(fp);
         fclose(fp1);
         break;
@@ -540,6 +603,7 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
             output[cc] = imag(Yk[cc]);
         }
         DrawLine(hStatic7, output, n);
+        DrawCoordinate(hStatic7, hFont, output, 0, n, n);
         break;
     }
     case cmdButton15:
@@ -574,6 +638,7 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
             output[cc] = y;
         }
         DrawLine(hStatic7, output, n);
+        DrawCoordinate(hStatic7, hFont, output, 0, n, n);
         break;
     }
     }                                         
@@ -606,76 +671,16 @@ void Drawlinemk2(HWND hWnd, POINT ptx, POINT ptty)
 }
 
 
-
-void Drawlinemk3(HWND hWnd)
-{
-    if (hWnd == hStatic4)
-    {
-        hWnd = hStatic6;
-    }
-    if (hWnd == hStatic5)
-    {
-        hWnd = hStatic7;
-    }
-    POINT* apt2;
-    int k = 0;
-    HDC hdc = GetDC(hWnd);
-    GetClientRect(hWnd, &rect);
-    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
-    SetBkColor(hdc, RGB(255, 255, 255));
-    FillRect(hdc, &rect, hBrush);
-    DeleteObject(hBrush);
-    hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));                   //Gainsboro
-    SelectObject(hdc, hpen);
-    int i = rect.bottom / 5;  int j = rect.right / 5;
-    while (i < rect.bottom)
-    {
-        MoveToEx(hdc, 0, i, NULL);
-        LineTo(hdc, rect.right, i);
-        i = i + rect.bottom / 5;
-    }
-    while (j < rect.right)
-    {
-        MoveToEx(hdc, j, 0, NULL);
-        LineTo(hdc, j, rect.bottom);
-        j = j + rect.right / 5;
-    }
-    DeleteObject(hpen);
-    rect.right = rect.right - 1;
-    rect.bottom = rect.bottom - 1;
-    hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-    SelectObject(hdc, hpen);
-    MoveToEx(hdc, 0, 0, NULL);
-    LineTo(hdc, rect.right, 0);
-    LineTo(hdc, rect.right, rect.bottom);
-    LineTo(hdc, 0, rect.bottom);
-    LineTo(hdc, 0, 0);
-    DeleteObject(hpen);
-    hpen = CreatePen(PS_SOLID, 1, RGB(24, 116, 205));                      //DodgerBlue
-    SelectObject(hdc, hpen);
-    apt2 = new POINT[m];
-    while (k<m && m != 1 )
-    {
-        apt2[k].x = k * rect.right / (m-1);
-        apt2[k].y = apt1[k].y * rect.bottom / 80;
-        k++;
-    }
-    Polyline(hdc, apt2, m);
-    DeleteObject(hpen);
-    delete[]apt2;
-    return;
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     //int wmId, wmEvent;    
     PAINTSTRUCT ps;
     HDC hdc;
     HDC hdcStatic;
-    static HFONT hFont;
     static HWND hStatic1;
     static HWND hStatic3;
     bool initSuccess;
+    int wmId, wmEvent;
 
     switch (message)
     {
@@ -687,7 +692,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             return -1;
         }
 
-        hFont = CreateFont(-14, -7, 0, 0, 400 ,
+        hFont = CreateFont(-12, -6, 0, 0, 400 ,
             FALSE/*斜体?*/, FALSE/*下划线?*/, FALSE/*删除线?*/, DEFAULT_CHARSET,
             OUT_CHARACTER_PRECIS, CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
             FF_DONTCARE, TEXT("微软雅黑"));
@@ -709,24 +714,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             20, 360, 143, 130, hWnd, (HMENU)8, NULL, NULL);
 
         hStatic4 = CreateWindow(TEXT("STATIC"), TEXT(""),
-            WS_CHILD | WS_VISIBLE ,
+            WS_CHILD | WS_VISIBLE | SS_OWNERDRAW ,
             200, 170, 900, 80, hWnd, (HMENU)4, NULL, NULL);
 
         hStatic5 = CreateWindow(TEXT("STATIC"), TEXT(""),
-            WS_CHILD | WS_VISIBLE ,
-            200, 430, 900, 80, hWnd, (HMENU)5, NULL, NULL);
+            WS_CHILD | WS_VISIBLE | SS_OWNERDRAW,
+            200, 490, 900, 80, hWnd, (HMENU)5, NULL, NULL);
 
         hStatic6 = CreateWindow(TEXT("STATIC"), TEXT(""),
-            WS_CHILD | WS_VISIBLE,
-            200, 250, 900, 180, hWnd, (HMENU)6, NULL, NULL);
+            WS_CHILD | WS_VISIBLE | SS_OWNERDRAW,
+            200, 280, 900, 180, hWnd, (HMENU)6, NULL, NULL);
 
         hStatic7 = CreateWindow(TEXT("STATIC"), TEXT(""),
-            WS_CHILD | WS_VISIBLE,
-            200, 510, 900, 180, hWnd, (HMENU)7, NULL, NULL);
+            WS_CHILD | WS_VISIBLE | SS_OWNERDRAW,
+            200, 600, 900, 180, hWnd, (HMENU)7, NULL, NULL);
+
+        hComboBox = CreateWindow(TEXT("COMBOBOX"), TEXT(""),
+            WS_CHILD | CBS_DROPDOWNLIST,
+            20, 510, 100, 80, hWnd, (HMENU)9, NULL, NULL);
 
         SendMessage(hStatic1, WM_SETFONT, (WPARAM)hFont, NULL);
         SendMessage(hStatic2, WM_SETFONT, (WPARAM)hFont, NULL);
         SendMessage(hStatic8, WM_SETFONT, (WPARAM)hFont, NULL);
+        SendMessage(hComboBox, WM_SETFONT, (WPARAM)hFont, NULL);
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)TEXT("时域"));
+        SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)0, 0);
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)TEXT("幅值、相位"));
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)TEXT("实部、虚部"));
 
 
     case WM_CTLCOLORSTATIC: 
@@ -734,68 +748,257 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hdcStatic = (HDC)wParam;
         SetBkMode(hdcStatic, TRANSPARENT);
     }
+    case WM_COMMAND:
+    {
+        wmId = lParam;
+        wmEvent = HIWORD(wParam);
+        switch (wmEvent)
+        {
+        case CBN_SELCHANGE:
+            TCHAR  szCombo[20];
+            GetDlgItemText(hWnd, 9, szCombo, 20);
+            if (wcscmp(szCombo, TEXT("时域")) == 0)
+            {
+                if (onum == NULL && onum1 == NULL)
+                {
+                    onum = gnum;
+                    onum1 = gnum1;
+                }
+                else
+                {
+                    gnum = onum;
+                    gnum1 = onum1;
+                }
+                InvalidateRect(hStatic6, NULL, true);
+                UpdateWindow(hStatic6);
+
+            }
+            if (wcscmp(szCombo, TEXT("幅值、相位")) == 0)
+            {
+                if (onum == NULL && onum1 == NULL)
+                {
+                    onum = gnum;
+                    onum1 = gnum1;
+                    gnum = anum;
+                    gnum1 = pnum;
+
+                }
+                else
+                {
+                    gnum = anum;
+                    gnum1 = pnum;
+                }
+                InvalidateRect(hStatic6, NULL, true);
+                UpdateWindow(hStatic6);
+            }
+            if (wcscmp(szCombo, TEXT("实部、虚部")) == 0)
+            {
+                if (onum == NULL && onum1 == NULL)
+                {
+                    onum = gnum;
+                    onum1 = gnum1;
+                    gnum = rnum;
+                    gnum1 = lnum;
+
+                }
+                else
+                {
+                    gnum = rnum;
+                    gnum1 = lnum;
+                }
+                InvalidateRect(hStatic6, NULL, true);
+                UpdateWindow(hStatic6);
+            }
+            break;
+        }
+        return 0;
+    }
 
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
-        if (ismove == 0)
-        {
-            switch (CanvasStatus)
-            {
-            case 1:
-            {
-                DrawLine(hStatic4, gnum, gn);
-                break;
-            }
-            case 2:
-            {
-                ismove = 1;
-                Drawlinemk2(hStatic4, pt, ptt);
-                Drawlinemk3(hStatic4);
-                ismove = 0;
-                break;
-            }
-            case 3:
-            {
-                DrawLine(hStatic4, gnum, gn);
-                DrawLine(hStatic5, gnum1, gn1);
-                break;
-            }
-            case 4:
-            {
-                ismove = 1;
-                Drawlinemk2(hStatic4, pt, ptt);
-                Drawlinemk3(hStatic4);
-                ismove = 0;
-                DrawLine(hStatic5, gnum1, gn1);
-                break;
-            }
-            case 5:
-            {
-                DrawLine(hStatic4, gnum, gn);
-                ismove = 2;
-                Drawlinemk2(hStatic5, pt1, ptt1);
-                Drawlinemk3(hStatic5);
-                ismove = 0;
-                break;
-            }
-            case 6:
-            {
-                ismove = 1;
-                Drawlinemk2(hStatic4, pt, ptt);
-                Drawlinemk3(hStatic4);
-                ismove = 2;
-                Drawlinemk2(hStatic5, pt1, ptt1);
-                Drawlinemk3(hStatic5);
-                ismove = 0;
-                break;
-            }
+        //if (ismove == 0)
+        //{
+        //    switch (CanvasStatus)
+        //    {
+        //    case 1:
+        //    {
+        //        DrawLine(hStatic4, gnum, gn);
+        //        break;
+        //    }
+        //    case 2:
+        //    {
+        //        ismove = 1;
+        //        Drawlinemk2(hStatic4, pt, ptt);
+        //        Drawlinemk3(hStatic4);
+        //        ismove = 0;
+        //        break;
+        //    }
+        //    case 3:
+        //    {
+        //        DrawLine(hStatic4, gnum, gn);
+        //        DrawLine(hStatic5, gnum1, gn1);
+        //        break;
+        //    }
+        //    case 4:
+        //    {
+        //        ismove = 1;
+        //        Drawlinemk2(hStatic4, pt, ptt);
+        //        Drawlinemk3(hStatic4);
+        //        ismove = 0;
+        //        DrawLine(hStatic5, gnum1, gn1);
+        //        break;
+        //    }
+        //    case 5:
+        //    {
+        //        DrawLine(hStatic4, gnum, gn);
+        //        ismove = 2;
+        //        Drawlinemk2(hStatic5, pt1, ptt1);
+        //        Drawlinemk3(hStatic5);
+        //        ismove = 0;
+        //        break;
+        //    }
+        //    case 6:
+        //    {
+        //        ismove = 1;
+        //        Drawlinemk2(hStatic4, pt, ptt);
+        //        Drawlinemk3(hStatic4);
+        //        ismove = 2;
+        //        Drawlinemk2(hStatic5, pt1, ptt1);
+        //        Drawlinemk3(hStatic5);
+        //        ismove = 0;
+        //        break;
+        //    }
 
-            }
-        }
+        //    }
+        //}
         EndPaint(hWnd, &ps);
         break;
     }        
+
+    case WM_DRAWITEM:
+    {
+        if (ismove == 0)
+        {
+            switch (BtnNum)
+            {
+            case 0:
+                return 0;
+            case cmdButton3:
+            case cmdButton4:
+            case cmdButton5:
+            case cmdButton6:
+            {
+                if (CanvasStatus ==1)
+                {
+                    DrawLine(hStatic4, gnum, gn);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                }
+                if (CanvasStatus ==2)
+                {
+                    ismove = 1;
+                    Drawlinemk2(hStatic4, pt, ptt);
+                    //Drawlinemk3(hStatic4);
+                    DrawLine(hStatic6, pnum1, m1);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic6, hFont, pnum1, k1, l1, m1);
+                    ismove = 0;
+                }
+                break;
+            }
+            case cmdButton7:
+            case cmdButton9:
+            {
+                switch (CanvasStatus)
+                {
+                case 3:
+                {
+                    DrawLine(hStatic4, gnum, gn);
+                    DrawLine(hStatic5, gnum1, gn1);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, m1);
+                    break;
+                }
+                case 4:
+                {
+                    ismove = 1;
+                    Drawlinemk2(hStatic4, pt, ptt);
+                    DrawLine(hStatic6, pnum1, m1);
+                    ismove = 0;
+                    DrawLine(hStatic5, gnum1, gn1);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, gn1);
+                    DrawCoordinate(hStatic6, hFont, pnum1, k1, l1, m1);
+                    break;
+                }
+                case 5:
+                {
+                    DrawLine(hStatic4, gnum, gn);
+                    ismove = 2;
+                    Drawlinemk2(hStatic5, pt1, ptt1);
+                    DrawLine(hStatic7, pnum2, m2);
+                    ismove = 0;
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, gn1);
+                    DrawCoordinate(hStatic7, hFont, pnum2, k2, l2, m2);
+                    break;
+                }
+                case 6:
+                {
+                    ismove = 1;
+                    Drawlinemk2(hStatic4, pt, ptt);
+                    DrawLine(hStatic6, pnum1, m1);
+                    ismove = 2;
+                    Drawlinemk2(hStatic5, pt1, ptt1);
+                    DrawLine(hStatic7, pnum2, m2);
+                    ismove = 0;
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, gn1);
+                    DrawCoordinate(hStatic6, hFont, pnum1, k1, l1, m1);
+                    DrawCoordinate(hStatic7, hFont, pnum2, k2, l2, m2);
+                    break;
+                }
+                default:
+                    break;
+                }
+                break;
+            }
+            case cmdButton8:
+            case cmdButton10:
+            case cmdButton11:
+            case cmdButton12:
+            case cmdButton13:
+            case cmdButton14:
+            case cmdButton15:
+            {
+                if (CanvasStatus == 3)
+                {
+                    DrawLine(hStatic4, gnum, gn);
+                    DrawLine(hStatic5, gnum1, gn1);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, gn1);
+                    break;
+                }
+                if (CanvasStatus == 4)
+                {
+                    ismove = 1;
+                    Drawlinemk2(hStatic4, pt, ptt);
+                    DrawLine(hStatic6, pnum1, m1);
+                    ismove = 0;
+                    DrawLine(hStatic5, gnum1, gn1);
+                    DrawCoordinate(hStatic4, hFont, gnum, 0, gn, gn);
+                    DrawCoordinate(hStatic5, hFont, gnum1, 0, gn1, gn1);
+                    DrawCoordinate(hStatic6, hFont, pnum1, k1, l1, m1);
+                    break;
+                }
+            break;
+            }
+            default:
+                break;
+            }
+        }
+        return 0;
+    }
 
     case WM_LBUTTONDOWN: 
     {
@@ -808,6 +1011,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case cmdButton5:
         case cmdButton6:
         case cmdButton7:
+        case cmdButton9:
         {
         pt0 = pt;
         GetCursorPos(&pt);
@@ -837,7 +1041,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0; 
         }
         case cmdButton8:
-        case cmdButton9:
         case cmdButton10:
         case cmdButton11:
         case cmdButton12:
@@ -870,11 +1073,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         if (ismove == 1)
         {
-            Drawlinemk3(hStatic4);
-            //if (isSpectrum == true)
-            //{
-
-            //}
+            delete []pnum1;
+            pnum1 = new double[m1];
+            for (int i = 0; i < m1; i++)
+            {
+                pnum1[i] = gnum[k1 + i];
+            }
+            DrawLine(hStatic6, pnum1, m1);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
             switch (CanvasStatus)
             {
                 case 1:
@@ -897,7 +1104,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (ismove == 2)
         {
-            Drawlinemk3(hStatic5);
+            delete[]pnum2;
+            pnum2 = new double[m2];
+            for (int i = 0; i < m2; i++)
+            {
+                pnum2[i] = gnum1[k2 + i];
+            }
+            DrawLine(hStatic7, pnum2, m2);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
             switch (CanvasStatus)
             {
                 case 3:
@@ -922,7 +1137,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             GetCursorPos(&ptt);
             ScreenToClient(hStatic4, &ptt);
-            //DrawLine(hStatic4, gnum, gn);
             Drawlinemk2(hStatic4, pt, ptt);
             SetWindowText(hStatic8, szBuffer1);
         }
@@ -930,7 +1144,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             GetCursorPos(&ptt1);
             ScreenToClient(hStatic5, &ptt1);
-            //DrawLine(hStatic5, gnum1, gn1);
             Drawlinemk2(hStatic5, pt1, ptt1);
             SetWindowText(hStatic8, szBuffer1);
         }

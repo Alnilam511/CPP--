@@ -71,7 +71,9 @@ STDMETHODIMP CSpectrumHandler::Execute(
             double* num = GetNum(fin, n);
                         
             ShowWindow(hStatic5, SW_SHOWDEFAULT);
-            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             DrawLine(hStatic4, num, n);
             gn = n;
             gnum = new double[gn];
@@ -109,9 +111,11 @@ STDMETHODIMP CSpectrumHandler::Execute(
             }
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
-            InvalidateRect(hStatic7, NULL, true);
-        }          
+            ShowWindow(hStatic6, SW_SHOW);
+            ShowWindow(hStatic7, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
+        }
     }
 
     if (nCmdID == cmdButton9 && verb == UI_EXECUTIONVERB_EXECUTE)
@@ -166,11 +170,19 @@ STDMETHODIMP CSpectrumHandler::Execute(
                 Vector < complex<Type> > Xk, Yk, Zk;
                 Vector <Type> xn, yn;
 
+
                 ifstream fin;
                 fin.open(szFileName1);
                 int n = GetLine(fin);
                 fin.close();
-
+                gn = n;
+                gn1 = n;
+                gnum = new double[gn];
+                gnum1 = new double[gn1];
+                rnum = new double[gn];
+                lnum = new double[gn1];
+                anum = new double[gn];
+                pnum = new double[gn1];
                 fin.open(szFileName1);
                 double* num = GetNum(fin, n);
 
@@ -179,6 +191,11 @@ STDMETHODIMP CSpectrumHandler::Execute(
                     xn.resize(n);
                     xn[i] = num[i];
                 }
+                for (int i = 0; i < n; i++)
+                {
+                    gnum[i] = num[i];
+                }
+
                 fin.close();
 
                 fin.open(szFileName2);
@@ -189,6 +206,11 @@ STDMETHODIMP CSpectrumHandler::Execute(
                     yn.resize(n);
                     yn[i] = num[i];
                 }
+                for (int i = 0; i < n; i++)
+                {
+                    gnum1[i] = num[i];
+                }
+
                 fin.close();
 
                 Xk = fftr2c(xn);
@@ -209,8 +231,37 @@ STDMETHODIMP CSpectrumHandler::Execute(
                 OutFile.close();
                 LPCTSTR str = L" 数据个数:\n   %i\n";
                 swprintf_s(szBuffer, str, n);
+
+                ShowWindow(hStatic5, SW_SHOWDEFAULT);
+                ShowWindow(hStatic7, SW_HIDE);
+                ShowWindow(hStatic6, SW_HIDE);
+                ShowWindow(hComboBox, SW_SHOW);
+                SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)0, 0);
+                CanvasStatus = 3;
+                for (int i = 0; i < gn; i++)
+                {
+                    rnum[i] = real(Zk[i]);
+                }
+                for (int i = 0; i < gn1; i++)
+                {
+                    lnum[i] = imag(Zk[i]);
+                }
+                for (int i = 0; i < gn1; i++)
+                {
+                    anum[i] = abs(Zk[i]);
+                }
+                for (int i = 0; i < gn1; i++)
+                {
+                    pnum[i] = atan(imag(Zk[i])/ real(Zk[i]));
+                }
+                DrawLine(hStatic4, gnum, gn);
+                DrawLine(hStatic5, gnum1, gn1);
                 SetWindowText(hStatic2, szBuffer);
                 SetWindowText(hStatic8, NULL);
+                ShowWindow(hStatic6, SW_SHOW);
+                ShowWindow(hStatic7, SW_SHOW);
+                InvalidateRect(hwnd, NULL, true);
+                UpdateWindow(hwnd);
             }
             else
             {
@@ -251,9 +302,10 @@ STDMETHODIMP CSpectrumHandler::Execute(
             fin.open(szFile);
             double* num = GetNum(fin, n);
 
-
             ShowWindow(hStatic5, SW_SHOWDEFAULT);
-            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             DrawLine(hStatic4, num, n);
             gn = n;
             gnum = new double[gn];
@@ -298,8 +350,10 @@ STDMETHODIMP CSpectrumHandler::Execute(
             }
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
-            InvalidateRect(hStatic7, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            ShowWindow(hStatic7, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
     }
 
@@ -331,8 +385,8 @@ STDMETHODIMP CSpectrumHandler::Execute(
             Type c = 0;
             Type b = Ls - 1.0;
             Vector<Type> t = linspace(c, b, Ls) / Type(Fs);
-            //Vector<Type> s = sin(Type(400 * PI) * pow(t, Type(2.0)));
-            Vector<Type> s = 1;
+            Vector<Type> s = sin(Type(400 * PI) * pow(t, Type(2.0)));
+            //Vector<Type> s = 1;
 
             c = 0;
             b = Type(Lg - 1.0);
@@ -436,7 +490,9 @@ STDMETHODIMP CSpectrumHandler::Execute(
                 fscanf_s(fp, "%f", &dataio[j]);
 
             ShowWindow(hStatic5, SW_SHOWDEFAULT);
-            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             gn = j;                                                         
             gnum = new double[gn];
             for (int i = 0; i < gn; i++)
@@ -474,8 +530,10 @@ STDMETHODIMP CSpectrumHandler::Execute(
             CanvasStatus = 3;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
-            InvalidateRect(hStatic7, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            ShowWindow(hStatic7, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
     }
 
@@ -513,9 +571,12 @@ STDMETHODIMP CSpectrumHandler::Execute(
             double* s = GetNum(fin, n);
 
             ShowWindow(hStatic5, SW_SHOWDEFAULT);
-            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
+
             DrawLine(hStatic4, s, n);
-            gn = n;                                                          //双窗口gnum，gnum1赋值
+            gn = n;
             gnum = new double[gn];
             for (i = 0; i < gn; i++)
             {
@@ -591,8 +652,10 @@ STDMETHODIMP CSpectrumHandler::Execute(
 
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
-            InvalidateRect(hStatic7, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            ShowWindow(hStatic7, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
     }
 
@@ -625,9 +688,12 @@ STDMETHODIMP CSpectrumHandler::Execute(
             double* s = GetNum(fin, n);
 
             ShowWindow(hStatic5, SW_SHOWDEFAULT);
-            ShowWindow(hStatic7, SW_SHOWDEFAULT);
+            ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
+
             DrawLine(hStatic4, s, n);
-            gn = n;                                                          //双窗口gnum，gnum1赋值
+            gn = n;
             gnum = new double[gn];
             for (int i = 0; i < gn; i++)
             {
@@ -671,34 +737,12 @@ STDMETHODIMP CSpectrumHandler::Execute(
             DrawLine(hStatic5, gnum1, n);
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
-            InvalidateRect(hStatic7, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            ShowWindow(hStatic7, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
     }
-
-    //if (nCmdID == cmdButton16 && verb == UI_EXECUTIONVERB_EXECUTE)
-    //{
-    //    //BtnNum = nCmdID;
-    //    OPENFILENAME ofn;
-    //    TCHAR szFile[MAX_PATH];
-    //    ZeroMemory(&ofn, sizeof(OPENFILENAME));
-    //    ofn.lStructSize = sizeof(OPENFILENAME);
-    //    ofn.hwndOwner = NULL;
-    //    ofn.lpstrFile = szFile;
-    //    ofn.lpstrFile[0] = '\0';
-    //    ofn.nMaxFile = sizeof(szFile);
-    //    ofn.lpstrFilter = L"Text\0*.TXT\0";
-    //    ofn.nFilterIndex = 1;
-    //    ofn.lpstrFileTitle = NULL;
-    //    ofn.nMaxFileTitle = 0;
-    //    ofn.lpstrInitialDir = NULL;
-    //    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-    //    if (GetOpenFileName(&ofn))
-    //    {
-
-    //    }
-    //}
 
     return S_OK;
 }

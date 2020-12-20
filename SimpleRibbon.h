@@ -9,3 +9,9 @@
 
 #include "resource.h"
 
+struct AxisText
+{
+	int x;
+	int y;
+	int num;
+};

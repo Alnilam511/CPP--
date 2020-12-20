@@ -8,7 +8,6 @@
     <Command Name="cmdTab2" LabelTitle="时域处理"/>  
 	<Command Name="cmdTab3" LabelTitle="频域处理"/>
     <Command Name="cmdTab4" LabelTitle="时频域处理"/>
-	<Command Name="cmdTab5" LabelTitle="高级处理"/>
 	<Command Name="cmdTab6" LabelTitle="输出"/>
 
     <Command Name="cmdGroup1"/>
@@ -156,26 +155,7 @@
 			<Image Id="351">res/PrintRelationshipsL.bmp</Image>
 		</Command.LargeImages>
 	</Command>
-	<Command Name="cmdButton16">
-	  <Command.LabelTitle>
-		<String Id ="360">分数阶傅里叶变换</String>
-	  </Command.LabelTitle>
-	  <Command.LargeImages>
-		<Image Id="361">res/PrintRelationshipsL.bmp</Image>
-	  </Command.LargeImages>
-	</Command>
-	  
-	<Command Name="cmdButton17">
-	  <Command.LabelTitle>
-		<String Id ="370">包络谱</String>
-	  </Command.LabelTitle>
-	  <Command.LargeImages>
-		<Image Id="371">res/PrintRelationshipsL.bmp</Image>
-	  </Command.LargeImages>
-	</Command>
-	  
-	  
-	  
+		  
     <Command Name="cmdQat"/>
     <Command Name="cmdFileMenu"/>
     <Command Name="cmdExit" Symbol="IDC_CMD_EXIT">
@@ -256,20 +236,14 @@
 		      </ScalingPolicy.IdealSizes>
 			</ScalingPolicy>
 		  </Tab.ScalingPolicy>
-		  <Group CommandName="cmdGroup1" SizeDefinition="SixButtons-TwoColumns">
+		  <Group CommandName="cmdGroup1" SizeDefinition="FiveOrSixButtons">
 			<Button CommandName="cmdButton11"/>
 			<Button CommandName="cmdButton12"/>
 			<Button CommandName="cmdButton13"/>
 			<Button CommandName="cmdButton14"/>
-			<Button CommandName="cmdButton15"/>
-			<Button CommandName="cmdButton16"/>  			  
+			<Button CommandName="cmdButton15"/>			  
 		  </Group>
-		</Tab>
-		<Tab CommandName="cmdTab5">
-			<Group CommandName="cmdGroup1" SizeDefinition="OneButton">
-				<Button CommandName="cmdButton17"/>
-			</Group>	
-		</Tab>
+		</Tab>		
       </Ribbon.Tabs>
       <Ribbon.QuickAccessToolbar>
         <QuickAccessToolbar CommandName="cmdQat" />

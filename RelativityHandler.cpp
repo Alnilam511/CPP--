@@ -58,13 +58,17 @@ STDMETHODIMP CRelativityHandler::Execute(
 
             ShowWindow(hStatic5, SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             DrawLine(hStatic4, num, n);
             gnum = num;
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
 
     }
@@ -148,7 +152,9 @@ STDMETHODIMP CRelativityHandler::Execute(
                 LPCTSTR str = L" 数据个数:\n   %i\n 互相关系数:\n   %.2f";
                 swprintf_s(szBuffer, str, n1, R);
                 ShowWindow(hStatic5, SW_SHOWDEFAULT);
-                ShowWindow(hStatic7, SW_SHOWDEFAULT);
+                ShowWindow(hStatic7, SW_HIDE);
+                ShowWindow(hStatic6, SW_HIDE);
+                ShowWindow(hComboBox, SW_HIDE);
                 DrawLine(hStatic4, num1, n1);
                 DrawLine(hStatic5, num2, n2);
                 gn = n1;                                                          //双窗口gnum，gnum1赋值
@@ -166,8 +172,10 @@ STDMETHODIMP CRelativityHandler::Execute(
                 }                
                 SetWindowText(hStatic2, szBuffer);
                 SetWindowText(hStatic8, NULL);
-                InvalidateRect(hStatic6, NULL, true);
-                InvalidateRect(hStatic7, NULL, true);
+                ShowWindow(hStatic6, SW_SHOW);
+                ShowWindow(hStatic7, SW_SHOW);
+                InvalidateRect(hwnd, NULL, true);
+                UpdateWindow(hwnd);
             }
             else
             {
@@ -260,6 +268,3 @@ STDMETHODIMP CRelativityHandler::QueryInterface(REFIID iid, void** ppv)
     AddRef();
     return S_OK;
 }
-
-
-

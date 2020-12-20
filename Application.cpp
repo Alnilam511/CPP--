@@ -95,7 +95,6 @@ STDMETHODIMP CApplication::OnCreateUICommand(
     case cmdButton13:
     case cmdButton14:
     case cmdButton15:
-    case cmdButton16:
     {
         CSpectrumHandler* pSpectrumHandler = NULL;
         hr = CSpectrumHandler::CreateInstance(&pSpectrumHandler);

@@ -19,11 +19,16 @@ using namespace std;
  HPEN hpen;
  double* gnum;
  double* gnum1;
+ double* rnum;      //实数
+ double* lnum;      //虚数
+ double* pnum;      //相位
+ double* anum;      //幅值
  int gn;
  int gn1;
  POINT* apt;
  POINT* aptt;
  POINT* apts;
+ HWND hwnd = GetParent(hStatic4);
 
 
  void DrawLine(HWND hWnd, double* num, int n)                          //固定波形绘制，num波形数组，n数组长度
@@ -36,18 +41,18 @@ using namespace std;
      DeleteObject(hBrush);
      hpen = CreatePen(PS_DASHDOT, 1, RGB(220, 220, 220));              //Gainsboro
      SelectObject(hdc, hpen);
-     int i = rect.bottom / 5;  int j = rect.right / 5;
+     int i = rect.bottom / 4;  int j = rect.right / 4;
      while (i < rect.bottom)
      {
          MoveToEx(hdc, 0, i, NULL);
          LineTo(hdc, rect.right, i);
-         i = i + rect.bottom / 5;
+         i = i + rect.bottom / 4;
      }
      while (j < rect.right)
      {
          MoveToEx(hdc, j, 0, NULL);
          LineTo(hdc, j, rect.bottom);
-         j = j + rect.right / 5;
+         j = j + rect.right / 4;
      }
      DeleteObject(hpen);
      rect.right = rect.right - 1;
@@ -72,6 +77,7 @@ using namespace std;
              min = Minimum(min, num[l]);
          }
          max = Maximum(fabs(max), fabs(min));
+         max = (long)max + 1;
          if (hWnd == hStatic4)                            //hstatic4 aptt
          {
              delete[]aptt;
@@ -84,7 +90,7 @@ using namespace std;
              }
              Polyline(hdc, aptt, n);
          }
-         if (hWnd == hStatic5)                          //hstatic5 apt
+         else if (hWnd == hStatic5)                          //hstatic5 apt
          {
              delete apt;
              apt = new POINT[n];
@@ -97,7 +103,7 @@ using namespace std;
              Polyline(hdc, apt, n);
 
          }
-         if (hWnd == hStatic7)
+         else 
          {
              delete apts;
              apts = new POINT[n];
@@ -168,13 +174,17 @@ STDMETHODIMP CCommandHandler::Execute(
 
             ShowWindow(hStatic5,SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             DrawLine(hStatic4, num, n);                                //固定波形绘制
             gnum = num;
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
 
     }
@@ -216,12 +226,16 @@ STDMETHODIMP CCommandHandler::Execute(
             DrawLine(hStatic4, num, n);
             ShowWindow(hStatic5, SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             gnum = num;
             gn = n;
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
 
     }
@@ -264,10 +278,14 @@ STDMETHODIMP CCommandHandler::Execute(
             gn = n;
             ShowWindow(hStatic5, SW_HIDE);
             ShowWindow(hStatic7, SW_HIDE);
+            ShowWindow(hStatic6, SW_HIDE);
+            ShowWindow(hComboBox, SW_HIDE);
             CanvasStatus = 1;
             SetWindowText(hStatic2, szBuffer);
             SetWindowText(hStatic8, NULL);
-            InvalidateRect(hStatic6, NULL, true);
+            ShowWindow(hStatic6, SW_SHOW);
+            InvalidateRect(hwnd, NULL, true);
+            UpdateWindow(hwnd);
         }
 
     }
